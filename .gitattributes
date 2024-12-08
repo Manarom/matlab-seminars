@@ -19,6 +19,7 @@
 *.slx binary merge=mlAutoMerge
 *.slxp binary
 
+*.mlx linguist-language=Matlab
 ## Other common binary file types
 *.docx binary
 *.exe binary
