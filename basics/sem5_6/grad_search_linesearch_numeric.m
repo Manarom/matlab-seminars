@@ -24,7 +24,11 @@ function [x,Fval,ii,flag]=grad_search_linesearch_numeric(x0,F,gradF,options)
         x_previous=x;
         F_previous = Fval; % рассчитываем значение функции
         grad_value = gradF(x); % рассчитываем градиент функции
-        grad_direction = grad_value/norm(grad_value); % используем только направление градиента
+        grad_norm = norm(grad_value);
+        if grad_norm==0
+            return
+        end
+        grad_direction = grad_value/grad_norm; % используем только направление градиента
         grad_direction = grad_direction(:);
         F_mu = @(mu_trial) F(x - mu_trial*grad_direction);% формулируем как указатель на функцию от длины шага
         gradF_mu = @(mu_trial) num_grad(F_mu,mu_trial);
@@ -33,7 +37,8 @@ function [x,Fval,ii,flag]=grad_search_linesearch_numeric(x0,F,gradF,options)
         x = x - mu*grad_direction;
         ii=ii+iter_number;
         flag = [norm(Fval-F_previous)>tol ...
-            norm(x_previous-x)>tol]; 
+            norm(x_previous-x)>tol...
+            grad_norm>tol]; 
         
     end
 end

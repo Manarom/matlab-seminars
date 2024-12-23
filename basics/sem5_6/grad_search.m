@@ -25,12 +25,12 @@ function [x,Fval,ii,flag,search_history]=grad_search(x0,F,gradF,options)
         F function_handle
         gradF function_handle
         options.mu (1,1) double =1e-2
-        options.N (1,1) double =10000
+        options.N (1,1) double =1000
         options.tol (1,1)double =1e-6
     end
     ii=1;
     x=x0(:);mu = options.mu;N = options.N;tol = options.tol;
-    flag=[true true];
+    flag=[true true true];
     Fval=F(x0);
     is_return_search_history = false;
     if nargout==5 % так как хранение всех точек может быть тяжелым
@@ -41,7 +41,8 @@ function [x,Fval,ii,flag,search_history]=grad_search(x0,F,gradF,options)
     while ii<N && all(flag) % условием остановки служит достидение заданного числа итераций и проверка сходимости
         x_previous=x;F_previous = Fval; % значения коордианты и функции на предыдущей итерации
         grad_value = gradF(x); % рассчитываем градиент функции
-        if norm(grad_value)==0
+        grad_norm = norm(grad_value);
+        if grad_norm==0
             return
         end
         grad_direction = grad_value/norm(grad_value); % используем только направление градиента
@@ -52,7 +53,8 @@ function [x,Fval,ii,flag,search_history]=grad_search(x0,F,gradF,options)
         end
         % флажок проверки сходимости
         flag = [norm(Fval-F_previous)>tol ...%  изменение значения функции
-            norm(x_previous-x)>tol]; %  изменение координаты
+            norm(x_previous-x)>tol ...
+            grad_norm>tol]; %  изменение координаты
         ii=ii+1; 
     end
     if is_return_search_history
