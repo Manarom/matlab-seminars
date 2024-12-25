@@ -1,6 +1,6 @@
 function [x,Fval,ii,flag,search_history]=grad_search_linesearch(x0,F,gradF,options)
 % простой оптимизатор методом градиентного спуска с линейным поиском
-% параметры см GRAD_SEARCH
+% параметры см GRAD_SEARCH 
     arguments
         x0 double
         F function_handle
