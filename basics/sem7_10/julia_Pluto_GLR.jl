@@ -17,7 +17,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 7ea0c852-e79e-11ef-276b-13fcf53182ec
-using Statistics, GLM,DataFrames,MAT, Plots,MultivariateStats,PlutoUI
+using Statistics, GLM,DataFrames,MAT, Plots,MultivariateStats,PlutoUI,LaTeXStrings
 
 # ╔═╡ 5668c805-8415-4c08-9193-3348e91b80d1
 md"""
@@ -54,15 +54,25 @@ f_select(modl::StatisticalModel)= begin
 end
 
 # ╔═╡ bf818fae-eda6-4dfe-a4b5-975077c14628
+#md"""
+# 	Select regression order $(@bind ord Select([first_order=>1, second_order=>2]))
+#"""
+
+# ╔═╡ 50a7dbad-029b-4119-8fd0-385f33ff40da
 md"""
- 	Select regression order $(@bind ord Select([first_order=>1, second_order=>2]))
-"""
+	``\phi=`` $(@bind phi Slider(0:360,default=30,show_value=true)) 
+	``\theta=`` $(@bind theta Slider(0:360,default=30,show_value=true)) 
+	"""
 
 # ╔═╡ 0aef72ed-0299-4364-9ea9-cf4d97482fd8
 begin
-	scatter3d(data.X1,data.X2,data.Y)
-	f=f_select(ord)
-	plot!(range(-30.0,30.0,100),range(-30,39,100),f,st=:surface,camera=(-30,30),alpha=0.5)
+	
+	p=scatter3d(data.X1,data.X2,data.Y)
+	for ord in (first_order,second_order)
+		f=f_select(ord)
+		plot!(range(extrema(data.X1)...,20),range(extrema(data.X2)...,20),f,st=:surface,camera=(-phi,theta),alpha=0.5)
+	end
+	p
 end
 
 # ╔═╡ cc60dc9e-2eb1-4037-a517-b31ff8746f6a
@@ -85,6 +95,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
 MultivariateStats = "6f286f6a-111f-5878-ab1e-185364afe411"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -94,6 +105,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 [compat]
 DataFrames = "~1.7.0"
 GLM = "~1.9.0"
+LaTeXStrings = "~1.4.0"
 MAT = "~0.10.7"
 MultivariateStats = "~0.10.3"
 Plots = "~1.40.9"
@@ -107,7 +119,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.3"
 manifest_format = "2.0"
-project_hash = "c11d8ff69153b86bd31d3f352a15859c5845465a"
+project_hash = "f51c9a740d31d97230e054c133fe209b42086e06"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1567,13 +1579,14 @@ version = "1.4.1+2"
 
 # ╔═╡ Cell order:
 # ╠═7ea0c852-e79e-11ef-276b-13fcf53182ec
-# ╠═5668c805-8415-4c08-9193-3348e91b80d1
-# ╠═c68546ef-2fb0-4a2a-b301-70894db9f36a
+# ╟─5668c805-8415-4c08-9193-3348e91b80d1
+# ╟─c68546ef-2fb0-4a2a-b301-70894db9f36a
 # ╠═863d1b1c-a93a-4a26-98dc-ffda6b4cd9d6
 # ╠═5df5be1e-ee18-4132-b3f0-d03a12b5cc5c
 # ╟─dffeb128-dd9d-489e-9ac6-3c5eef38e1c4
-# ╟─bf818fae-eda6-4dfe-a4b5-975077c14628
-# ╟─0aef72ed-0299-4364-9ea9-cf4d97482fd8
+# ╠═bf818fae-eda6-4dfe-a4b5-975077c14628
+# ╠═50a7dbad-029b-4119-8fd0-385f33ff40da
+# ╠═0aef72ed-0299-4364-9ea9-cf4d97482fd8
 # ╠═cc60dc9e-2eb1-4037-a517-b31ff8746f6a
 # ╠═30ca39c9-709d-46e1-8edd-2ff3975af278
 # ╠═3553f1bc-f478-4f7f-9b1a-10165335aa17
