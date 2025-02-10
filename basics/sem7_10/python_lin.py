@@ -3,24 +3,20 @@
 
 
 import numpy as np
+import matplotlib
+matplotlib.use('TkAgg') 
 import matplotlib.pyplot as plt
 
-
-#try:
-#    import probml_utils as pml
-#except ModuleNotFoundError:
-#    %pip install -qq git+https://github.com/probml/probml-utils.git
-#    import probml_utils as pml
 from scipy.io import loadmat
-#import requests
-#from io import BytesIO
 from mpl_toolkits.mplot3d import Axes3D
+from scipy.stats import linregress
+
 
 #url = "https://raw.githubusercontent.com/probml/probml-data/main/data/moteData/moteData.mat"
 #response = requests.get(url)
 # rawdata = response.text
 #rawdata = BytesIO(response.content)
-data = loadmat(".\\basics\\sem7_10\\\DataSurfFit") # грузит матлабовский файл
+data = loadmat(".\\basics\\sem7_10\\DataSurfFit") # грузит матлабовский файл
 
 
 X = data["X"]
@@ -60,7 +56,7 @@ for use_quad in (False, True):
     name = "linregSurfaceLinear.pdf"
     if use_quad:
         name = "linregSurfaceQuad.pdf"
-
-    #pml.savefig(name)
-    plt.show()
-     
+    #plt.savefig(name)
+    plt.show() 
+    
+    
