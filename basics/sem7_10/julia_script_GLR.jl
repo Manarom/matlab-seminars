@@ -8,15 +8,19 @@ using Statistics, GLM,DataFrames,MAT, Plots,MultivariateStats
 * `DataFrames.jl` - package to work with data in column oriented format
 * `MultivariateStats.jl` - alternative to GLM
 """
+# open-read to Dict - close MATLAB mat-file using matopen function from MAT.jl package
 file = matopen(joinpath(".","basics","sem7_10","DataSurfFit.mat"))
-data_dict=read(file)
+data_dict=read(file) 
 close(file)
+# converting to DataFrame format
 data = DataFrame(Y=data_dict["y"][:,1], X1=data_dict["X"][:,1],X2=data_dict["X"][:,2])
 
+# linear regression using lm function from GLM
 first_order= lm(@formula(Y ~ X1 + X2),data) # first order linear regression
-
 second_order = lm(@formula(Y ~ X1 + X2 +X1^2 + X2^2),data) # second order linear regression
 
+
+# plotting results in 3d using Plots package functions
 f_select(modl::StatisticalModel)= begin
 	c = coef(modl)
 	N=length(c)
@@ -31,7 +35,7 @@ for ord in (first_order,second_order)
     f=f_select(ord)
     plot!(range(extrema(data.X1)...,100),range(extrema(data.X2)...,100),f,st=:surface,camera=(-30,30),alpha=0.5)
 end
-
+# alternative way using llsq function from MultivariateStats package
 a_lin = MultivariateStats.llsq(data_dict["X"], data_dict["y"])
 coef(first_order)
 a_square = MultivariateStats.llsq(hcat(data_dict["X"], data_dict["X"].^2), data_dict["y"])
