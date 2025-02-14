@@ -42,15 +42,21 @@ first_order= lm(@formula(Y ~ X1 + X2),data) # first order linear regression
 # ╔═╡ 5df5be1e-ee18-4132-b3f0-d03a12b5cc5c
 second_order = lm(@formula(Y ~ X1 + X2 +X1^2 + X2^2),data) # second order linear regression
 
-# ╔═╡ dffeb128-dd9d-489e-9ac6-3c5eef38e1c4
-f_select(modl::StatisticalModel)= begin
-	c = coef(modl)
-	N=length(c)
-	if N==3 
-		return (x1,x2)->c[1] + c[2]*x1 + c[3]*x2
-	else
-		return (x1,x2)->c[1] + c[2]*x1 + c[3]*x2 + c[4]*x1^2 + c[5]*x2^2
+# ╔═╡ 461727d7-9464-48e2-a5fc-6c6f6e69b6ad
+fourth_order = lm(@formula(Y ~ X1 + X2 +X1^2 + X2^2+X1^3 + X2^3+X1^4 + X2^4),data)
+
+# ╔═╡ def5f2de-5a50-41df-a441-0194aa2d5f47
+function f_select2(modl::StatisticalModel)
+	c = coef(modl) #array of polynomial coefficients
+	order= div(length(c)-1,2)
+	f = (x1,x2)->c[1]
+	for i ∈ 1:order
+		f=let fprev=f,i=i #need to introduce a new scope to prevent from stack overflow
+			(x1,x2)->fprev(x1,x2)+ ^(x1,i)*c[2*i]+ ^(x2,i)*c[2*i+1]
+		end
+		
 	end
+	return f
 end
 
 # ╔═╡ bf818fae-eda6-4dfe-a4b5-975077c14628
@@ -64,16 +70,22 @@ md"""
 	``\theta=`` $(@bind theta Slider(0:360,default=30,show_value=true)) 
 	"""
 
+# ╔═╡ b6d92087-39f0-4f53-9719-cbe1e00de563
+@bind ch1  MultiCheckBox([first_order=>"first", second_order=>"second", fourth_order=>"fourth"])
+
 # ╔═╡ 0aef72ed-0299-4364-9ea9-cf4d97482fd8
 begin
-	
 	p=scatter3d(data.X1,data.X2,data.Y)
-	for ord in (first_order,second_order)
-		f=f_select(ord)
-		plot!(range(extrema(data.X1)...,20),range(extrema(data.X2)...,20),f,st=:surface,camera=(-phi,theta),alpha=0.5)
+	for ord in ch1
+		plot!(range(extrema(data.X1)...,20),range(extrema(data.X2)...,20),f_select2(ord),st=:surface,camera=(-phi,theta),alpha=0.5)
 	end
 	p
 end
+
+# ╔═╡ 6ee3317f-a080-4a6c-8d27-76ae02cc9dc9
+md"""
+### Second example is from MultivatiateStatistics package
+"""
 
 # ╔═╡ cc60dc9e-2eb1-4037-a517-b31ff8746f6a
 Npoints = length( data_dict["y"])
@@ -1548,10 +1560,13 @@ version = "1.4.1+2"
 # ╟─c68546ef-2fb0-4a2a-b301-70894db9f36a
 # ╠═863d1b1c-a93a-4a26-98dc-ffda6b4cd9d6
 # ╠═5df5be1e-ee18-4132-b3f0-d03a12b5cc5c
-# ╟─dffeb128-dd9d-489e-9ac6-3c5eef38e1c4
+# ╠═461727d7-9464-48e2-a5fc-6c6f6e69b6ad
+# ╠═def5f2de-5a50-41df-a441-0194aa2d5f47
 # ╠═bf818fae-eda6-4dfe-a4b5-975077c14628
 # ╠═50a7dbad-029b-4119-8fd0-385f33ff40da
+# ╠═b6d92087-39f0-4f53-9719-cbe1e00de563
 # ╠═0aef72ed-0299-4364-9ea9-cf4d97482fd8
+# ╠═6ee3317f-a080-4a6c-8d27-76ae02cc9dc9
 # ╠═cc60dc9e-2eb1-4037-a517-b31ff8746f6a
 # ╠═30ca39c9-709d-46e1-8edd-2ff3975af278
 # ╠═3553f1bc-f478-4f7f-9b1a-10165335aa17
