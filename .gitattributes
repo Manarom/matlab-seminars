@@ -20,6 +20,7 @@
 *.slxp binary
 
 *.mlx linguist-language=Matlab
+*.ipynb linguist-language=Matlab
 ## Other common binary file types
 *.docx binary
 *.exe binary
