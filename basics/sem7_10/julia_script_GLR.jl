@@ -36,6 +36,7 @@ for ord in (first_order,second_order)
     f=f_select(ord)
     plot!(range(extrema(data.X1)...,100),range(extrema(data.X2)...,100),f,st=:surface,camera=(-30,30),alpha=0.5)
 end
+
 # alternative way using llsq function from MultivariateStats package
 a_lin = MultivariateStats.llsq(data_dict["X"], data_dict["y"])
 coef(first_order)
