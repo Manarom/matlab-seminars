@@ -4,7 +4,7 @@
 
 import numpy as np
 import matplotlib
-matplotlib.use('TkAgg') 
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 from scipy.io import loadmat
@@ -20,43 +20,35 @@ data = loadmat(".\\basics\\sem7_10\\DataSurfFit") # грузит матлабо�
 
 
 X = data["X"]
-y = data["y"]
+y = data["y"].flatten()
 
 n = len(y)
 X_pad = np.column_stack((np.ones(n), X))
 
+phi = X_pad
+fig = plt.figure()
+ax = fig.add_subplot(1,2,1, projection='3d') #first image 
+ax.set_zlim(15, 19)
+ax.scatter(X[:, 0], X[:, 1], y, color="r")
+n = 10
+xrange = np.linspace(min(X[:, 0]), max(X[:, 0]), n)
+yrange = np.linspace(min(X[:, 1]), max(X[:, 1]), n)
+xx, yy = np.meshgrid(xrange, yrange)
+flatxx = xx.reshape((n**2, 1))
+flatyy = yy.reshape((n**2, 1))
+w = np.linalg.lstsq(phi, y)[0]
+z = np.column_stack((flatxx, flatyy))
+z = np.column_stack((np.ones(n**2), z))
+f = np.dot(z, w)
+ax.plot_surface(xx, yy, f.reshape(n, n), rstride=1, cstride=1, cmap="jet")
 
-for use_quad in (False, True):
-    phi = X_pad
 
-    if use_quad:
-        phi = np.column_stack((X_pad, X**2))
-
-    fig = plt.figure()
-    ax = Axes3D(fig)
-    ax.set_zlim(15, 19)
-    ax.scatter(X[:, 0], X[:, 1], y, color="r")
-
-    n = 10
-    xrange = np.linspace(min(X[:, 0]), max(X[:, 0]), n)
-    yrange = np.linspace(min(X[:, 1]), max(X[:, 1]), n)
-    xx, yy = np.meshgrid(xrange, yrange)
-    flatxx = xx.reshape((n**2, 1))
-    flatyy = yy.reshape((n**2, 1))
-    w = np.linalg.lstsq(phi, y)[0]
-
-    z = np.column_stack((flatxx, flatyy))
-    z = np.column_stack((np.ones(n**2), z))
-    if use_quad:
-        z = np.column_stack((z, flatxx**2, flatyy**2))
-
-    f = np.dot(z, w)
-    ax.plot_surface(xx, yy, f.reshape(n, n), rstride=1, cstride=1, cmap="jet")
-
-    name = "linregSurfaceLinear.pdf"
-    if use_quad:
-        name = "linregSurfaceQuad.pdf"
-    #plt.savefig(name)
-    plt.show() 
-    
-    
+ax = fig.add_subplot(1,2,2, projection='3d') #second image 
+ax.set_zlim(15, 19)
+ax.scatter(X[:, 0], X[:, 1], y, color="r")
+phi = np.column_stack((X_pad, X**2))
+w = np.linalg.lstsq(phi, y)[0]
+z = np.column_stack((z, flatxx**2, flatyy**2))
+f = np.dot(z, w)
+ax.plot_surface(xx, yy, f.reshape(n, n), rstride=1, cstride=1, cmap="jet")
+plt.show()

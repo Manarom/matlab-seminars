@@ -31,3 +31,9 @@ resources/
 
 # Cloud based storage dotfile
 .MATLABDriveTag
+
+# vscode folder
+.vscode
+
+# venv folder
+venv
