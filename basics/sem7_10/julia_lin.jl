@@ -9,7 +9,8 @@ plotly();
 * `MultivariateStats.jl` - alternative to GLM
 """
 # open-read to Dict - close MATLAB mat-file using matopen function from MAT.jl package
-file = matopen(joinpath(".","basics","sem7_10","DataSurfFit.mat"))
+#file = matopen(joinpath(".","basics","sem7_10","DataSurfFit.mat"))
+file = matopen(joinpath(@__DIR__,"DataSurfFit.mat"))
 data_dict=read(file) 
 close(file)
 # converting to DataFrame format
