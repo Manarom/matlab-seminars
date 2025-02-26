@@ -14,7 +14,7 @@ plotly();
 file = matopen(joinpath(@__DIR__,"DataSurfFit.mat"))
 data_dict=read(file) 
 close(file)
-# converting to DataFrame format
+# converting to DataFrame format]
 data = DataFrame(Y=data_dict["y"][:,1], X1=data_dict["X"][:,1],X2=data_dict["X"][:,2])
 
 # linear regression using lm function from GLM
