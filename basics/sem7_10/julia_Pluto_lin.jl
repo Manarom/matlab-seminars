@@ -130,20 +130,42 @@ md" horizontal= $(@bind b_dim Slider(1:800,default=100,show_value=true))"
 
 # ╔═╡ 8bca55a4-bf1b-47db-8593-338862a9a4f5
 begin 
-	M = size(gray_image,1)
-	N = size(gray_image,2)
+	@show M = size(gray_image,1)
+	@show N = size(gray_image,2)
 	t_dims = [a_dim,b_dim];
 	# test_image_dimentions 
-	Mlast = M-t_dims[1]-1 # число строк в обучающйе выборке
-	Nlast = N-t_dims[2]-1# число столбцов предикторов в обучающей выборке
+	@show Mlast = M-t_dims[1]-1 # число строк в обучающйе выборке
+	@show Nlast = N-t_dims[2]-1# число столбцов предикторов в обучающей выборке
 	XTrain =gray_image[1:Mlast,1:Nlast] # формируем матрицу предикторов
 	YTrain =gray_image[1:Mlast,(Nlast+1):end] # формируем матрицу зависимой переменной
 	XTest = gray_image[(Mlast+1):end,1:Nlast]
 	YTest = gray_image[(Mlast+1):end,(Nlast+1):end]
 end;
 
-# ╔═╡ 8a9cb875-53c8-42cc-a6e6-bea059e19852
+# ╔═╡ ca481522-55db-407e-aeac-827a3c355559
+XTrain
 
+# ╔═╡ 37ead2b4-06c2-466d-8892-6120e57ea4dd
+YTrain
+
+# ╔═╡ 18904619-47df-4d71-ba3d-0a8ff5fc1a5e
+size(XTrain)
+
+# ╔═╡ 6c4b5618-2e74-4b27-a892-33e81abfeec7
+#convert(Array{Float64},XTrain)
+
+# ╔═╡ 837319d7-8e43-4bde-ba3b-a28302a0f7eb
+#convert(Array{Float64},YTrain)
+
+# ╔═╡ a2a2f8fa-2ed5-4cbb-9936-946b742dec7a
+
+
+# ╔═╡ 8a9cb875-53c8-42cc-a6e6-bea059e19852
+begin
+	B = MultivariateStats.llsq(convert(Array{Float64},XTrain),
+		convert(Array{Float64},YTrain))
+	Ypredict = convert(Array{Float64},XTest)*B
+end
 
 # ╔═╡ Cell order:
 # ╠═6bc0e2d0-8c81-4af8-8d5a-441aea48f9d4
@@ -167,7 +189,13 @@ end;
 # ╠═443fab6e-a312-47a0-9ff3-d718774b944f
 # ╠═9007a73f-92c7-438c-86ff-df13fa88f32a
 # ╠═86adaebf-3313-48da-9634-91f36ab2b577
-# ╟─fca50485-9db6-4389-a84b-4f5bbbb2155c
-# ╟─d97cce38-8c67-40db-a5a2-053d1f320f15
-# ╠═8bca55a4-bf1b-47db-8593-338862a9a4f5
+# ╠═fca50485-9db6-4389-a84b-4f5bbbb2155c
+# ╠═d97cce38-8c67-40db-a5a2-053d1f320f15
+# ╟─8bca55a4-bf1b-47db-8593-338862a9a4f5
+# ╠═ca481522-55db-407e-aeac-827a3c355559
+# ╠═37ead2b4-06c2-466d-8892-6120e57ea4dd
+# ╠═18904619-47df-4d71-ba3d-0a8ff5fc1a5e
+# ╠═6c4b5618-2e74-4b27-a892-33e81abfeec7
+# ╠═837319d7-8e43-4bde-ba3b-a28302a0f7eb
+# ╠═a2a2f8fa-2ed5-4cbb-9936-946b742dec7a
 # ╠═8a9cb875-53c8-42cc-a6e6-bea059e19852
