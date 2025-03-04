@@ -27,10 +27,7 @@ begin
 end
 
 # ╔═╡ 7ea0c852-e79e-11ef-276b-13fcf53182ec
-using Statistics, GLM,DataFrames,MAT, Plots,MultivariateStats,PlutoUI,LaTeXStrings,Images,ImageIO
-
-# ╔═╡ 323036df-adb6-4a5a-823f-feb5f55efb33
-plotly()
+using Statistics, GLM,DataFrames,MAT, Plots,MultivariateStats,PlutoUI,LaTeXStrings,Images,ImageIO,TestImages
 
 # ╔═╡ 5668c805-8415-4c08-9193-3348e91b80d1
 md"""
@@ -116,7 +113,13 @@ coef(first_order)
 coef(second_order)
 
 # ╔═╡ 9007a73f-92c7-438c-86ff-df13fa88f32a
-im_data = load(joinpath(pwd(),"figs","test1.jpg"))
+im_data_load = load(joinpath(pwd(),"figs","test1.jpg"))
+
+# ╔═╡ 06293b21-39a4-49a8-999b-d1a283273f84
+md"left vertical $(@bind left_remain_col Slider(1:size(im_data_load,2),default=1)), right vertical  $(@bind right_remain_col Slider(1:size(im_data_load,2),default=size(im_data_load,2)))"
+
+# ╔═╡ 40a1c667-11a8-48da-94d3-61263e0f52f3
+im_data = im_data_load[:,left_remain_col:right_remain_col]
 
 # ╔═╡ 86adaebf-3313-48da-9634-91f36ab2b577
 gray_image = Gray.(im_data)
@@ -170,7 +173,6 @@ end
 # ╔═╡ Cell order:
 # ╠═6bc0e2d0-8c81-4af8-8d5a-441aea48f9d4
 # ╠═7ea0c852-e79e-11ef-276b-13fcf53182ec
-# ╠═323036df-adb6-4a5a-823f-feb5f55efb33
 # ╟─5668c805-8415-4c08-9193-3348e91b80d1
 # ╟─c68546ef-2fb0-4a2a-b301-70894db9f36a
 # ╠═863d1b1c-a93a-4a26-98dc-ffda6b4cd9d6
@@ -188,6 +190,8 @@ end
 # ╠═392bdf83-f6dc-46bf-80dc-4df53e5062c0
 # ╠═443fab6e-a312-47a0-9ff3-d718774b944f
 # ╠═9007a73f-92c7-438c-86ff-df13fa88f32a
+# ╟─40a1c667-11a8-48da-94d3-61263e0f52f3
+# ╟─06293b21-39a4-49a8-999b-d1a283273f84
 # ╠═86adaebf-3313-48da-9634-91f36ab2b577
 # ╠═fca50485-9db6-4389-a84b-4f5bbbb2155c
 # ╠═d97cce38-8c67-40db-a5a2-053d1f320f15
