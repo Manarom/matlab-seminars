@@ -112,62 +112,92 @@ coef(first_order)
 # ╔═╡ 443fab6e-a312-47a0-9ff3-d718774b944f
 coef(second_order)
 
+# ╔═╡ c940e665-e055-4d75-8e3d-09525437e71f
+
+
+# ╔═╡ 81ec5301-7bde-4f02-a191-5d6cb3136ff0
+@bind type_im Select(["default", "test_image", "webcam"])
+
+# ╔═╡ 19e79d80-2282-43bb-9fd4-a8e0dc057c1e
+@bind test_image_name Select(TestImages.remotefiles)
+
 # ╔═╡ 9007a73f-92c7-438c-86ff-df13fa88f32a
-im_data_load = load(joinpath(pwd(),"figs","test1.jpg"))
+begin 
+	if type_im=="default"
+		im_data_load = load(joinpath(pwd(),"figs","test1.jpg"))
+	elseif type_im=="test_image"
+		im_data_load = testimage(test_image_name)
+	else
+		@bind im_data_load WebcamInput(help=false)
+	end
+end;
 
 # ╔═╡ 06293b21-39a4-49a8-999b-d1a283273f84
 md"left vertical $(@bind left_remain_col Slider(1:size(im_data_load,2),default=1)), right vertical  $(@bind right_remain_col Slider(1:size(im_data_load,2),default=size(im_data_load,2)))"
 
-# ╔═╡ 40a1c667-11a8-48da-94d3-61263e0f52f3
-im_data = im_data_load[:,left_remain_col:right_remain_col]
+# ╔═╡ b0c6d40a-5723-4f77-af8a-fb50b04ffab9
+md"upper horizontal $(@bind up_remain_row Slider(1:size(im_data_load,1),default=1)), lower horizontal  $(@bind dwn_remain_row Slider(1:size(im_data_load,1),default=size(im_data_load,1)))"
 
-# ╔═╡ 86adaebf-3313-48da-9634-91f36ab2b577
-gray_image = Gray.(im_data)
+# ╔═╡ 40a1c667-11a8-48da-94d3-61263e0f52f3
+im_data = im_data_load[up_remain_row:dwn_remain_row,left_remain_col:right_remain_col]
 
 # ╔═╡ fca50485-9db6-4389-a84b-4f5bbbb2155c
-md" vertical= $(@bind a_dim Slider(1:800,default=100, show_value=true))"
+md" horizontal= $(@bind a_dim Slider(5:size(im_data,1),default=floor(2*size(im_data,1)/3), show_value=true))"
 	
 
 # ╔═╡ d97cce38-8c67-40db-a5a2-053d1f320f15
-md" horizontal= $(@bind b_dim Slider(1:800,default=100,show_value=true))" 
+md" vertical= $(@bind b_dim Slider(5:size(im_data,2),default=floor(2*size(im_data,2)/3),show_value=true))" 
+
+# ╔═╡ 489defda-9a8c-4aae-88ab-821a880c01bd
+
+
+# ╔═╡ f6e5e8f0-fb85-469e-9745-d49af5719893
+function rescale_image_data(Y)
+end
+
+# ╔═╡ 474149e5-0cf9-41d5-a2a8-66ceabc3441c
+function get_inds(vert,hor,step=5)
+	return (vert-step:vert+step,hor-step:hor+step)
+end
+
+# ╔═╡ ada0dc4c-3414-4388-b62d-b5667aa0249e
+function add_cross(vert,hor,imag;color=0)
+	ranges = get_inds(vert,hor)
+	gray_image_copy = copy(imag)
+	gray_image_copy[ranges[1],:].=color
+	gray_image_copy[:,ranges[2]].=color
+	return gray_image_copy
+end
+
+# ╔═╡ 86adaebf-3313-48da-9634-91f36ab2b577
+begin 
+	gray_image = Gray.(im_data)
+	add_cross(a_dim,b_dim,gray_image)
+	
+end
 
 # ╔═╡ 8bca55a4-bf1b-47db-8593-338862a9a4f5
 begin 
-	@show M = size(gray_image,1)
-	@show N = size(gray_image,2)
+	M = size(gray_image,1)
+	N = size(gray_image,2)
 	t_dims = [a_dim,b_dim];
+	num_image = convert(Array{Float64},gray_image)
 	# test_image_dimentions 
-	@show Mlast = M-t_dims[1]-1 # число строк в обучающйе выборке
-	@show Nlast = N-t_dims[2]-1# число столбцов предикторов в обучающей выборке
-	XTrain =gray_image[1:Mlast,1:Nlast] # формируем матрицу предикторов
-	YTrain =gray_image[1:Mlast,(Nlast+1):end] # формируем матрицу зависимой переменной
-	XTest = gray_image[(Mlast+1):end,1:Nlast]
-	YTest = gray_image[(Mlast+1):end,(Nlast+1):end]
+	Mlast  = t_dims[1]
+	Nlast = t_dims[2]
+	XTrain =num_image[1:Mlast,1:Nlast] # формируем матрицу предикторов
+	YTrain =num_image[1:Mlast,(Nlast+1):end] # формируем матрицу зависимой переменной
+	XTest = num_image[(Mlast+1):end,1:Nlast]
+	YTest = num_image[(Mlast+1):end,(Nlast+1):end]
+	Itest = ones(Float64,(size(XTest,1),))
 end;
-
-# ╔═╡ ca481522-55db-407e-aeac-827a3c355559
-XTrain
-
-# ╔═╡ 37ead2b4-06c2-466d-8892-6120e57ea4dd
-YTrain
-
-# ╔═╡ 18904619-47df-4d71-ba3d-0a8ff5fc1a5e
-size(XTrain)
-
-# ╔═╡ 6c4b5618-2e74-4b27-a892-33e81abfeec7
-#convert(Array{Float64},XTrain)
-
-# ╔═╡ 837319d7-8e43-4bde-ba3b-a28302a0f7eb
-#convert(Array{Float64},YTrain)
-
-# ╔═╡ a2a2f8fa-2ed5-4cbb-9936-946b742dec7a
-
 
 # ╔═╡ 8a9cb875-53c8-42cc-a6e6-bea059e19852
 begin
 	B = MultivariateStats.llsq(convert(Array{Float64},XTrain),
 		convert(Array{Float64},YTrain))
-	Ypredict = convert(Array{Float64},XTest)*B
+	Ypredict = hcat(Itest,XTest)*B
+	convert(Array{eltype(gray_image)},Ypredict)
 end
 
 # ╔═╡ Cell order:
@@ -189,17 +219,19 @@ end
 # ╠═3553f1bc-f478-4f7f-9b1a-10165335aa17
 # ╠═392bdf83-f6dc-46bf-80dc-4df53e5062c0
 # ╠═443fab6e-a312-47a0-9ff3-d718774b944f
+# ╠═c940e665-e055-4d75-8e3d-09525437e71f
+# ╠═81ec5301-7bde-4f02-a191-5d6cb3136ff0
+# ╠═19e79d80-2282-43bb-9fd4-a8e0dc057c1e
 # ╠═9007a73f-92c7-438c-86ff-df13fa88f32a
 # ╟─40a1c667-11a8-48da-94d3-61263e0f52f3
 # ╟─06293b21-39a4-49a8-999b-d1a283273f84
-# ╠═86adaebf-3313-48da-9634-91f36ab2b577
+# ╟─b0c6d40a-5723-4f77-af8a-fb50b04ffab9
+# ╟─86adaebf-3313-48da-9634-91f36ab2b577
 # ╠═fca50485-9db6-4389-a84b-4f5bbbb2155c
 # ╠═d97cce38-8c67-40db-a5a2-053d1f320f15
-# ╟─8bca55a4-bf1b-47db-8593-338862a9a4f5
-# ╠═ca481522-55db-407e-aeac-827a3c355559
-# ╠═37ead2b4-06c2-466d-8892-6120e57ea4dd
-# ╠═18904619-47df-4d71-ba3d-0a8ff5fc1a5e
-# ╠═6c4b5618-2e74-4b27-a892-33e81abfeec7
-# ╠═837319d7-8e43-4bde-ba3b-a28302a0f7eb
-# ╠═a2a2f8fa-2ed5-4cbb-9936-946b742dec7a
+# ╠═8bca55a4-bf1b-47db-8593-338862a9a4f5
 # ╠═8a9cb875-53c8-42cc-a6e6-bea059e19852
+# ╠═489defda-9a8c-4aae-88ab-821a880c01bd
+# ╠═f6e5e8f0-fb85-469e-9745-d49af5719893
+# ╟─474149e5-0cf9-41d5-a2a8-66ceabc3441c
+# ╟─ada0dc4c-3414-4388-b62d-b5667aa0249e
