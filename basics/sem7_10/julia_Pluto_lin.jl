@@ -168,6 +168,7 @@ begin
 	XTest = num_image[(Mlast+1):end,1:Nlast]
 	YTest = num_image[(Mlast+1):end,(Nlast+1):end]
 	Itest = ones(Float64,(size(XTest,1),))
+	Itrain = ones(Float64,(size(XTrain,1),))
 end;
 
 # ╔═╡ 23fbbc31-4a91-4e0f-9c14-71cb1b74168d
@@ -226,13 +227,16 @@ end
 
 # ╔═╡ 8a9cb875-53c8-42cc-a6e6-bea059e19852
 begin
-	B = MultivariateStats.llsq(XTrain,
-		YTrain)
+	#B = MultivariateStats.llsq(XTrain,
+	#	YTrain)
+	B = hcat(Itrain,XTrain)\YTrain
 	Ypredict = hcat(Itest,XTest)*B
-	svd_obj = simpleSVD(XTrain)
+	svd_obj = simpleSVD(copy(XTrain))
 	setdim!(svd_obj,dim=diment)
-	calculate(svd_obj);
-	Bpca = score(svd_obj)\YTrain
+	X_copy = copy(XTrain)
+	centr!(X_copy)
+	@show norm(X_copy - calculate(svd_obj));
+	Bpca = hcat(Itrain,score(svd_obj))\YTrain
 	Xtest_reduced= predict(svd_obj,XTest)
 	Ypredict_pca = hcat(Itest,Xtest_reduced)*Bpca
 end;
@@ -313,15 +317,15 @@ end
 # ╟─59a6eee5-4727-42e6-9946-eb8ca6ffcd65
 # ╟─d97cce38-8c67-40db-a5a2-053d1f320f15
 # ╠═3a60f58e-2562-4743-b5a4-7037fd28d691
-# ╟─8bca55a4-bf1b-47db-8593-338862a9a4f5
+# ╠═8bca55a4-bf1b-47db-8593-338862a9a4f5
 # ╠═8a9cb875-53c8-42cc-a6e6-bea059e19852
-# ╠═adb95995-1e36-4c2b-922c-d2f14eb16e7c
-# ╠═9aadcae9-0abb-4c57-a1a4-50406d704554
-# ╠═23fbbc31-4a91-4e0f-9c14-71cb1b74168d
-# ╠═5d47ef5e-b25b-4c0d-9ff4-5f6a166b160a
-# ╠═49c9ece0-d49c-438f-b939-fdd035065109
-# ╠═afd79dd6-3182-454f-870b-cc98be000fb4
-# ╠═54ea96e1-58e3-4e4c-979f-74a0969875d2
+# ╟─adb95995-1e36-4c2b-922c-d2f14eb16e7c
+# ╟─9aadcae9-0abb-4c57-a1a4-50406d704554
+# ╟─23fbbc31-4a91-4e0f-9c14-71cb1b74168d
+# ╟─5d47ef5e-b25b-4c0d-9ff4-5f6a166b160a
+# ╟─49c9ece0-d49c-438f-b939-fdd035065109
+# ╟─afd79dd6-3182-454f-870b-cc98be000fb4
+# ╟─54ea96e1-58e3-4e4c-979f-74a0969875d2
 # ╟─4c39f833-4905-4c08-977e-8e9d5687e546
 # ╟─9ef26e86-8bf9-4584-9257-4083efea0ecb
 # ╟─474149e5-0cf9-41d5-a2a8-66ceabc3441c
