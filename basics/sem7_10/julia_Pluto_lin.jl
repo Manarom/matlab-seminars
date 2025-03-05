@@ -151,6 +151,9 @@ horizontal= $(@bind a_dim Slider(5:size(im_data,1),default=floor(2*size(im_data,
 vertical= $(@bind b_dim Slider(5:size(im_data,2),default=floor(2*size(im_data,2)/3),show_value=true))
 	""" 
 
+# ╔═╡ 3a60f58e-2562-4743-b5a4-7037fd28d691
+md"dimentionality $(@bind diment Slider(1:size(im_data,2),show_value=true,default=5))"
+
 # ╔═╡ 8bca55a4-bf1b-47db-8593-338862a9a4f5
 begin 
 	M = size(gray_image,1)
@@ -167,43 +170,72 @@ begin
 	Itest = ones(Float64,(size(XTest,1),))
 end;
 
-# ╔═╡ 8a9cb875-53c8-42cc-a6e6-bea059e19852
-begin
-	B = MultivariateStats.llsq(XTrain,
-		YTrain)
-	Ypredict = hcat(Itest,XTest)*B
-	
-	pca_obj = fit(PCA, XTrain,maxoutdim=15);
-	projection(pca_obj);
-
-	#Bpca = MultivariateStats.llsq(reconstruct,
-	#	YTrain)
-	
-end;
+# ╔═╡ 23fbbc31-4a91-4e0f-9c14-71cb1b74168d
+function centr!(X) 
+	mu = Vector{Float64}(undef,size(X,2))
+	for (i,c) in enumerate(eachcol(X))
+		mu[i]=mean(c)
+		X[:,i].-=mu[i]
+	end
+	return mu
+end
 
 # ╔═╡ 9aadcae9-0abb-4c57-a1a4-50406d704554
 mutable struct simpleSVD
 	U
 	S
 	V
-	simpleSVD(X::Matrix)=new(svd(X)...)
+	mu
+	simpleSVD(X::Matrix)=begin 
+		mu = centr!(X)
+		new(svd(X)...,mu)
+	end
 end
 
-# ╔═╡ 2b4e1cf0-60ba-419a-b5f9-2fd6248d9f3c
-simpleSVD(rand(5,3))
+# ╔═╡ adb95995-1e36-4c2b-922c-d2f14eb16e7c
+function calculate(s::simpleSVD)
+	return s.U*Diagonal(s.S)*transpose(s.V)
+end
+
+# ╔═╡ 5d47ef5e-b25b-4c0d-9ff4-5f6a166b160a
+function score(s::simpleSVD)
+	return s.U*Diagonal(s.S)
+end
 
 # ╔═╡ 49c9ece0-d49c-438f-b939-fdd035065109
+function coeffs(s::simpleSVD)
+	return s.V
+end
 
+# ╔═╡ afd79dd6-3182-454f-870b-cc98be000fb4
+function predict(s::simpleSVD,X)
+	Xpred = copy(X)
+	centr!(Xpred)
+	return Xpred*s.V
+end
 
 # ╔═╡ 54ea96e1-58e3-4e4c-979f-74a0969875d2
-function setdim!(s::simpleSVD,dim)
-	if dim<=lentgh(s.S) || dim<1
+function setdim!(s::simpleSVD;dim=1)
+	if dim>=length(s.S) || dim<1
 		return nothing
 	end
 	s.U = s.U[:,1:dim]
 	s.S = s.S[1:dim]
-	s.V = s.V[1:dim,:]
+	s.V = s.V[:,1:dim]
 end
+
+# ╔═╡ 8a9cb875-53c8-42cc-a6e6-bea059e19852
+begin
+	B = MultivariateStats.llsq(XTrain,
+		YTrain)
+	Ypredict = hcat(Itest,XTest)*B
+	svd_obj = simpleSVD(XTrain)
+	setdim!(svd_obj,dim=diment)
+	calculate(svd_obj);
+	Bpca = score(svd_obj)\YTrain
+	Xtest_reduced= predict(svd_obj,XTest)
+	Ypredict_pca = hcat(Itest,Xtest_reduced)*Bpca
+end;
 
 # ╔═╡ 9ef26e86-8bf9-4584-9257-4083efea0ecb
 trim_bounds(lb,rb,val)= val<lb ? lb : val>rb ? rb : val
@@ -236,6 +268,8 @@ begin
 		 if show_part == "linreg"
 			 gray_image_to_show[a_dim+1:end,b_dim+1:end] .= Gray.(trim_to_grey!(Ypredict))
 		 else
+			 Ypredict_pca
+			 gray_image_to_show[a_dim+1:end,b_dim+1:end] .= Gray.(trim_to_grey!(Ypredict_pca))
 		 end
 	end
 	add_cross!(a_dim,b_dim,gray_image_to_show)
@@ -278,12 +312,16 @@ end
 # ╟─86adaebf-3313-48da-9634-91f36ab2b577
 # ╟─59a6eee5-4727-42e6-9946-eb8ca6ffcd65
 # ╟─d97cce38-8c67-40db-a5a2-053d1f320f15
-# ╠═8bca55a4-bf1b-47db-8593-338862a9a4f5
+# ╠═3a60f58e-2562-4743-b5a4-7037fd28d691
+# ╟─8bca55a4-bf1b-47db-8593-338862a9a4f5
 # ╠═8a9cb875-53c8-42cc-a6e6-bea059e19852
-# ╠═2b4e1cf0-60ba-419a-b5f9-2fd6248d9f3c
+# ╠═adb95995-1e36-4c2b-922c-d2f14eb16e7c
 # ╠═9aadcae9-0abb-4c57-a1a4-50406d704554
+# ╠═23fbbc31-4a91-4e0f-9c14-71cb1b74168d
+# ╠═5d47ef5e-b25b-4c0d-9ff4-5f6a166b160a
 # ╠═49c9ece0-d49c-438f-b939-fdd035065109
-# ╟─54ea96e1-58e3-4e4c-979f-74a0969875d2
+# ╠═afd79dd6-3182-454f-870b-cc98be000fb4
+# ╠═54ea96e1-58e3-4e4c-979f-74a0969875d2
 # ╟─4c39f833-4905-4c08-977e-8e9d5687e546
 # ╟─9ef26e86-8bf9-4584-9257-4083efea0ecb
 # ╟─474149e5-0cf9-41d5-a2a8-66ceabc3441c
