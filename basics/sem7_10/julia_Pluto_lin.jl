@@ -27,7 +27,7 @@ begin
 end
 
 # ╔═╡ 7ea0c852-e79e-11ef-276b-13fcf53182ec
-using Statistics, GLM,DataFrames,MAT, Plots,MultivariateStats,PlutoUI,LaTeXStrings,Images,ImageIO,TestImages
+using Statistics, GLM,DataFrames,MAT, Plots,MultivariateStats,PlutoUI,LaTeXStrings,Images,ImageIO,TestImages,LinearAlgebra
 
 # ╔═╡ 5668c805-8415-4c08-9193-3348e91b80d1
 md"""
@@ -68,11 +68,6 @@ function f_select2(modl::StatisticalModel)
 	end
 	return f
 end
-
-# ╔═╡ bf818fae-eda6-4dfe-a4b5-975077c14628
-#md"""
-# 	Select regression order $(@bind ord Select([first_order=>1, second_order=>2]))
-#"""
 
 # ╔═╡ 50a7dbad-029b-4119-8fd0-385f33ff40da
 md"""
@@ -121,6 +116,9 @@ coef(second_order)
 # ╔═╡ 19e79d80-2282-43bb-9fd4-a8e0dc057c1e
 @bind test_image_name Select(TestImages.remotefiles)
 
+# ╔═╡ a1d79755-d99f-464e-8c86-3b5d0c42a9c4
+@bind im_data_cal WebcamInput(help=false)
+
 # ╔═╡ 9007a73f-92c7-438c-86ff-df13fa88f32a
 begin 
 	if type_im=="default"
@@ -128,7 +126,7 @@ begin
 	elseif type_im=="test_image"
 		im_data_load = testimage(test_image_name)
 	else
-		@bind im_data_load WebcamInput(help=false)
+		im_data_load = copy(im_data_cal)
 	end
 end;
 
@@ -141,40 +139,17 @@ md"upper horizontal $(@bind up_remain_row Slider(1:size(im_data_load,1),default=
 # ╔═╡ 40a1c667-11a8-48da-94d3-61263e0f52f3
 im_data = im_data_load[up_remain_row:dwn_remain_row,left_remain_col:right_remain_col]
 
-# ╔═╡ fca50485-9db6-4389-a84b-4f5bbbb2155c
-md" horizontal= $(@bind a_dim Slider(5:size(im_data,1),default=floor(2*size(im_data,1)/3), show_value=true))"
-	
+# ╔═╡ 495cf577-4a43-4a8b-8180-da03563ea104
+gray_image = Gray.(im_data);
+
+# ╔═╡ 59a6eee5-4727-42e6-9946-eb8ca6ffcd65
+@bind show_part Select(["original", "linreg", "pca linreg"])
 
 # ╔═╡ d97cce38-8c67-40db-a5a2-053d1f320f15
-md" vertical= $(@bind b_dim Slider(5:size(im_data,2),default=floor(2*size(im_data,2)/3),show_value=true))" 
-
-# ╔═╡ 489defda-9a8c-4aae-88ab-821a880c01bd
-
-
-# ╔═╡ f6e5e8f0-fb85-469e-9745-d49af5719893
-function rescale_image_data(Y)
-end
-
-# ╔═╡ 474149e5-0cf9-41d5-a2a8-66ceabc3441c
-function get_inds(vert,hor,step=5)
-	return (vert-step:vert+step,hor-step:hor+step)
-end
-
-# ╔═╡ ada0dc4c-3414-4388-b62d-b5667aa0249e
-function add_cross(vert,hor,imag;color=0)
-	ranges = get_inds(vert,hor)
-	gray_image_copy = copy(imag)
-	gray_image_copy[ranges[1],:].=color
-	gray_image_copy[:,ranges[2]].=color
-	return gray_image_copy
-end
-
-# ╔═╡ 86adaebf-3313-48da-9634-91f36ab2b577
-begin 
-	gray_image = Gray.(im_data)
-	add_cross(a_dim,b_dim,gray_image)
-	
-end
+md""" 
+horizontal= $(@bind a_dim Slider(5:size(im_data,1),default=floor(2*size(im_data,1)/3), show_value=true))
+vertical= $(@bind b_dim Slider(5:size(im_data,2),default=floor(2*size(im_data,2)/3),show_value=true))
+	""" 
 
 # ╔═╡ 8bca55a4-bf1b-47db-8593-338862a9a4f5
 begin 
@@ -194,10 +169,59 @@ end;
 
 # ╔═╡ 8a9cb875-53c8-42cc-a6e6-bea059e19852
 begin
-	B = MultivariateStats.llsq(convert(Array{Float64},XTrain),
-		convert(Array{Float64},YTrain))
+	B = MultivariateStats.llsq(XTrain,
+		YTrain)
 	Ypredict = hcat(Itest,XTest)*B
-	convert(Array{eltype(gray_image)},Ypredict)
+	
+	pca_obj = fit(PCA, XTrain,maxoutdim=15);
+	projection(pca_obj);
+
+	#Bpca = MultivariateStats.llsq(reconstruct,
+	#	YTrain)
+	
+end;
+
+# ╔═╡ 9ef26e86-8bf9-4584-9257-4083efea0ecb
+trim_bounds(lb,rb,val)= val<lb ? lb : val>rb ? rb : val
+
+# ╔═╡ 4c39f833-4905-4c08-977e-8e9d5687e546
+function trim_to_grey!(image_data)
+	for (i,a) in enumerate(image_data)
+		image_data[i]=trim_bounds(0,1,a)
+	end
+	return image_data
+end
+
+# ╔═╡ 474149e5-0cf9-41d5-a2a8-66ceabc3441c
+function get_inds(vert,hor,step=2)
+	return (vert-step:vert+step,hor-step:hor+step)
+end
+
+# ╔═╡ 6f29896b-b01d-4df6-b506-ed0bfa22aa3c
+function add_cross!(vert,hor,imag;color=0)
+	ranges = get_inds(vert,hor)
+	imag[ranges[1],:].=color
+	imag[:,ranges[2]].=color
+	return imag
+end
+
+# ╔═╡ 86adaebf-3313-48da-9634-91f36ab2b577
+begin 
+	gray_image_to_show = copy(gray_image)
+	if show_part != "original"
+		 if show_part == "linreg"
+			 gray_image_to_show[a_dim+1:end,b_dim+1:end] .= Gray.(trim_to_grey!(Ypredict))
+		 else
+		 end
+	end
+	add_cross!(a_dim,b_dim,gray_image_to_show)
+	
+end
+
+# ╔═╡ ada0dc4c-3414-4388-b62d-b5667aa0249e
+function add_cross(vert,hor,imag;color=0)
+	gray_image_copy = copy(imag)
+	return add_cross!(vert,hor,gray_image_copy,color=color)
 end
 
 # ╔═╡ Cell order:
@@ -209,10 +233,9 @@ end
 # ╠═5df5be1e-ee18-4132-b3f0-d03a12b5cc5c
 # ╠═461727d7-9464-48e2-a5fc-6c6f6e69b6ad
 # ╠═def5f2de-5a50-41df-a441-0194aa2d5f47
-# ╠═bf818fae-eda6-4dfe-a4b5-975077c14628
 # ╠═50a7dbad-029b-4119-8fd0-385f33ff40da
 # ╠═b6d92087-39f0-4f53-9719-cbe1e00de563
-# ╠═0aef72ed-0299-4364-9ea9-cf4d97482fd8
+# ╟─0aef72ed-0299-4364-9ea9-cf4d97482fd8
 # ╠═6ee3317f-a080-4a6c-8d27-76ae02cc9dc9
 # ╠═cc60dc9e-2eb1-4037-a517-b31ff8746f6a
 # ╠═30ca39c9-709d-46e1-8edd-2ff3975af278
@@ -222,16 +245,19 @@ end
 # ╠═c940e665-e055-4d75-8e3d-09525437e71f
 # ╠═81ec5301-7bde-4f02-a191-5d6cb3136ff0
 # ╠═19e79d80-2282-43bb-9fd4-a8e0dc057c1e
+# ╠═a1d79755-d99f-464e-8c86-3b5d0c42a9c4
 # ╠═9007a73f-92c7-438c-86ff-df13fa88f32a
 # ╟─40a1c667-11a8-48da-94d3-61263e0f52f3
 # ╟─06293b21-39a4-49a8-999b-d1a283273f84
 # ╟─b0c6d40a-5723-4f77-af8a-fb50b04ffab9
+# ╠═495cf577-4a43-4a8b-8180-da03563ea104
 # ╟─86adaebf-3313-48da-9634-91f36ab2b577
-# ╠═fca50485-9db6-4389-a84b-4f5bbbb2155c
-# ╠═d97cce38-8c67-40db-a5a2-053d1f320f15
+# ╟─59a6eee5-4727-42e6-9946-eb8ca6ffcd65
+# ╟─d97cce38-8c67-40db-a5a2-053d1f320f15
 # ╠═8bca55a4-bf1b-47db-8593-338862a9a4f5
 # ╠═8a9cb875-53c8-42cc-a6e6-bea059e19852
-# ╠═489defda-9a8c-4aae-88ab-821a880c01bd
-# ╠═f6e5e8f0-fb85-469e-9745-d49af5719893
+# ╟─4c39f833-4905-4c08-977e-8e9d5687e546
+# ╟─9ef26e86-8bf9-4584-9257-4083efea0ecb
 # ╟─474149e5-0cf9-41d5-a2a8-66ceabc3441c
 # ╟─ada0dc4c-3414-4388-b62d-b5667aa0249e
+# ╟─6f29896b-b01d-4df6-b506-ed0bfa22aa3c
