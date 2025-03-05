@@ -181,6 +181,30 @@ begin
 	
 end;
 
+# ╔═╡ 9aadcae9-0abb-4c57-a1a4-50406d704554
+mutable struct simpleSVD
+	U
+	S
+	V
+	simpleSVD(X::Matrix)=new(svd(X)...)
+end
+
+# ╔═╡ 2b4e1cf0-60ba-419a-b5f9-2fd6248d9f3c
+simpleSVD(rand(5,3))
+
+# ╔═╡ 49c9ece0-d49c-438f-b939-fdd035065109
+
+
+# ╔═╡ 54ea96e1-58e3-4e4c-979f-74a0969875d2
+function setdim!(s::simpleSVD,dim)
+	if dim<=lentgh(s.S) || dim<1
+		return nothing
+	end
+	s.U = s.U[:,1:dim]
+	s.S = s.S[1:dim]
+	s.V = s.V[1:dim,:]
+end
+
 # ╔═╡ 9ef26e86-8bf9-4584-9257-4083efea0ecb
 trim_bounds(lb,rb,val)= val<lb ? lb : val>rb ? rb : val
 
@@ -256,6 +280,10 @@ end
 # ╟─d97cce38-8c67-40db-a5a2-053d1f320f15
 # ╠═8bca55a4-bf1b-47db-8593-338862a9a4f5
 # ╠═8a9cb875-53c8-42cc-a6e6-bea059e19852
+# ╠═2b4e1cf0-60ba-419a-b5f9-2fd6248d9f3c
+# ╠═9aadcae9-0abb-4c57-a1a4-50406d704554
+# ╠═49c9ece0-d49c-438f-b939-fdd035065109
+# ╟─54ea96e1-58e3-4e4c-979f-74a0969875d2
 # ╟─4c39f833-4905-4c08-977e-8e9d5687e546
 # ╟─9ef26e86-8bf9-4584-9257-4083efea0ecb
 # ╟─474149e5-0cf9-41d5-a2a8-66ceabc3441c
