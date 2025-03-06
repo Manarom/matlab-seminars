@@ -47,30 +47,3 @@ a_square = MultivariateStats.llsq(hcat(data_dict["X"], data_dict["X"].^2), data_
 coef(second_order)
 
 display(p)
-
-	# load iris dataset
-	iris = dataset("datasets", "iris")
-	
-	# split half to training set
-	Xtr = Matrix(iris[1:2:end,1:4])'
-	Xtr_labels = Vector(iris[1:2:end,5])
-	
-	# split other half to testing set
-	Xte = Matrix(iris[2:2:end,1:4])'
-	Xte_labels = Vector(iris[2:2:end,5])
-	M = fit(PCA, Xtr; maxoutdim=4)
-	Xcentered = centr(Xtr)
-	
-	svd_ = svd(centr(Xtr))
-	centr(X) = begin
-		Xout = copy(X)
-		for (i,c) in enumerate(eachcol(X))
-			Xout[:,i].-=mean(c)
-		end
-		return Xout
-	end
-	size(svd_)
-	svd_.U
-	M.proj
-	Yte = predict(M, Xte)
-	Xr = reconstruct(M, Yte)
