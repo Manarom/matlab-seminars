@@ -143,7 +143,7 @@ im_data = im_data_load[up_remain_row:dwn_remain_row,left_remain_col:right_remain
 gray_image = Gray.(im_data);
 
 # ╔═╡ 59a6eee5-4727-42e6-9946-eb8ca6ffcd65
-@bind show_part Select(["original", "linreg", "pca linreg"])
+@bind show_part Select(["original", "linreg", "pca linreg","ridge", "ridge pca"])
 
 # ╔═╡ d97cce38-8c67-40db-a5a2-053d1f320f15
 md""" 
@@ -153,6 +153,9 @@ vertical= $(@bind b_dim Slider(5:size(im_data,2),default=floor(2*size(im_data,2)
 
 # ╔═╡ 3a60f58e-2562-4743-b5a4-7037fd28d691
 md"dimentionality $(@bind diment Slider(1:size(im_data,2),show_value=true,default=5))"
+
+# ╔═╡ 7970325f-5dc3-474f-867f-81e906471677
+md"ridge regression ``\alpha`` $(@bind alfa Slider(0:0.01:10,default=0.1,show_value=true))"
 
 # ╔═╡ 8bca55a4-bf1b-47db-8593-338862a9a4f5
 begin 
@@ -239,6 +242,13 @@ begin
 	Bpca = hcat(Itrain,score(svd_obj))\YTrain
 	Xtest_reduced= predict(svd_obj,XTest)
 	Ypredict_pca = hcat(Itest,Xtest_reduced)*Bpca
+	
+	Brid = MultivariateStats.ridge(XTrain,YTrain,alfa)
+	Ypredict_ridge = hcat(Itest,XTest)*Brid
+
+	BridPCA = MultivariateStats.ridge(score(svd_obj),YTrain,alfa)
+	# Xtest_reduced= predict(svd_obj,XTest)
+	Ypredict_ridge_pca = hcat(Itest,Xtest_reduced)*BridPCA	
 end;
 
 # ╔═╡ 9ef26e86-8bf9-4584-9257-4083efea0ecb
@@ -271,6 +281,10 @@ begin
 	if show_part != "original"
 		 if show_part == "linreg"
 			 gray_image_to_show[a_dim+1:end,b_dim+1:end] .= Gray.(trim_to_grey!(Ypredict))
+		 elseif show_part == "ridge"
+			 gray_image_to_show[a_dim+1:end,b_dim+1:end] .= Gray.(trim_to_grey!(Ypredict_ridge))
+		 elseif show_part =="ridge pca"
+			  gray_image_to_show[a_dim+1:end,b_dim+1:end] .= Gray.(trim_to_grey!(Ypredict_ridge_pca))
 		 else
 			 Ypredict_pca
 			 gray_image_to_show[a_dim+1:end,b_dim+1:end] .= Gray.(trim_to_grey!(Ypredict_pca))
@@ -316,7 +330,8 @@ end
 # ╟─86adaebf-3313-48da-9634-91f36ab2b577
 # ╟─59a6eee5-4727-42e6-9946-eb8ca6ffcd65
 # ╟─d97cce38-8c67-40db-a5a2-053d1f320f15
-# ╠═3a60f58e-2562-4743-b5a4-7037fd28d691
+# ╟─3a60f58e-2562-4743-b5a4-7037fd28d691
+# ╟─7970325f-5dc3-474f-867f-81e906471677
 # ╟─8bca55a4-bf1b-47db-8593-338862a9a4f5
 # ╟─8a9cb875-53c8-42cc-a6e6-bea059e19852
 # ╟─adb95995-1e36-4c2b-922c-d2f14eb16e7c
