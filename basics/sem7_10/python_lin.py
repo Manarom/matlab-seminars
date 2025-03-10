@@ -19,13 +19,13 @@ from scipy.stats import linregress
 data = loadmat(".\\basics\\sem7_10\\DataSurfFit") # грузит матлабовский файл
 
 
-X = data["X"]
-y = data["y"].flatten()
+X = data["X"] # initial two-column data
+y = data["y"].flatten() # dependent variable column
 
 n = len(y)
-X_pad = np.column_stack((np.ones(n), X))
+X_pad = np.column_stack((np.ones(n), X)) 
 
-phi = X_pad
+phi = X_pad # predictors matrix including dummy variable
 fig = plt.figure()
 ax = fig.add_subplot(1,2,1, projection='3d') #first image 
 ax.set_zlim(15, 19)
