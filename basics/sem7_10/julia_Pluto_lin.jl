@@ -27,7 +27,7 @@ begin
 end
 
 # ╔═╡ 7ea0c852-e79e-11ef-276b-13fcf53182ec
-using Statistics, GLM,DataFrames,MAT, Plots,MultivariateStats,PlutoUI,LaTeXStrings,Images,ImageIO,TestImages,LinearAlgebra
+using Statistics, GLM,DataFrames,MAT, Plots,MultivariateStats,PlutoUI,LaTeXStrings,Images,ImageIO,TestImages,LinearAlgebra,ImageShow
 
 # ╔═╡ 5668c805-8415-4c08-9193-3348e91b80d1
 md"""
@@ -143,7 +143,7 @@ im_data = im_data_load[up_remain_row:dwn_remain_row,left_remain_col:right_remain
 gray_image = Gray.(im_data);
 
 # ╔═╡ 59a6eee5-4727-42e6-9946-eb8ca6ffcd65
-@bind show_part Select(["original", "linreg", "pca linreg","ridge", "ridge pca"])
+@bind show_part Select(["original", "linreg", "pca linreg","ridge", "ridge pca","local-weighted"])
 
 # ╔═╡ d97cce38-8c67-40db-a5a2-053d1f320f15
 md""" 
@@ -152,10 +152,39 @@ vertical= $(@bind b_dim Slider(5:size(im_data,2),default=floor(2*size(im_data,2)
 	""" 
 
 # ╔═╡ 3a60f58e-2562-4743-b5a4-7037fd28d691
-md"dimentionality $(@bind diment Slider(1:size(im_data,2),show_value=true,default=5))"
+md"PCA dimentionality $(@bind diment Slider(1:size(im_data,2),show_value=true,default=5))"
 
 # ╔═╡ 7970325f-5dc3-474f-867f-81e906471677
-md"ridge regression ``\alpha`` $(@bind alfa Slider(0:0.01:10,default=0.1,show_value=true))"
+md"""
+Ridge regression: `` \alpha_0`` $(@bind alfa_const Slider(0:0.01:30,default=0.1,show_value=true))
+``\alpha_1`` $(@bind alfa_tangent Slider(-10:0.001:10,default=0.0,show_value=true))
+"""
+
+# ╔═╡ b3034d2c-afa7-4d7a-9159-b4477057642e
+md"""
+	Local-weighted regression : \
+	``\mu_1=`` $( @bind muy Slider(1:size(im_data,1),show_value=true,default=220) )
+	``\mu_2=`` $( @bind mux Slider(1:size(im_data,2),show_value=true,default=180) ) \
+
+
+	``\sigma_1=`` $( @bind sigmay Slider(1e-2:1e-2:1000,show_value=true,default=60) )
+	``\sigma_2=`` $( @bind sigmax Slider(1e-2:1e-2:1000,show_value=true,default=60) )	
+	"""
+
+# ╔═╡ 07c5113a-69b6-4983-9384-768db121e7b9
+md"""
+Ridge regression formulation
+```math
+    \mathop{\mathrm{minimize}}_b \
+    \frac{1}{2} \|\mathbf{y} - \mathbf{X} \mathbf{b}\|^2 +
+    \frac{1}{2} \mathbf{b}^T \mathbf{A} \mathbf{b}
+```
+ ```math
+	A=\matrix{\alpha_1&\dots&0\cr&\ddots &0\cr 0&\dots &\alpha_n}
+```
+Further we suppose that `` \alpha(i)`` is linearly dependent on normalized index:
+``\alpha(i)=\alpha_0 + i\cdot\alpha_1`` where ``i\in[-1...1]``
+"""
 
 # ╔═╡ 8bca55a4-bf1b-47db-8593-338862a9a4f5
 begin 
@@ -168,11 +197,60 @@ begin
 	Nlast = t_dims[2]
 	XTrain =num_image[1:Mlast,1:Nlast] # формируем матрицу предикторов
 	YTrain =num_image[1:Mlast,(Nlast+1):end] # формируем матрицу зависимой переменной
+	
+	
 	XTest = num_image[(Mlast+1):end,1:Nlast]
 	YTest = num_image[(Mlast+1):end,(Nlast+1):end]
 	Itest = ones(Float64,(size(XTest,1),))
 	Itrain = ones(Float64,(size(XTrain,1),))
+	Ytrain_indices = (1:Mlast,(Nlast+1):N)
 end;
+
+# ╔═╡ ad685d82-b2cd-438d-b4e0-6155848ab651
+begin 
+		alfa_coord = range(-1.0,1.0,size(XTrain,2));
+		alfa =abs.(alfa_const .+ collect(alfa_coord)*alfa_tangent)
+		plot(alfa_coord,alfa,label=L"\alpha",plot_title="Regularisation vector")
+end;
+
+# ╔═╡ ba209452-2ec7-42ba-a607-244d1c7cbea7
+function weigted_regression(X,Y,w)
+	B = Array{Float64,2}(undef,size(X,2),size(Y,2))
+	@assert size(w,1)==size(X,1)==size(Y,1)
+	if size(w,2)<=1 # weights are vector
+		for (i,y) in enumerate(eachcol(Y))
+			B[:,i] .=(w.*X)\(y.*w)
+		end
+	else # weights are matrix
+		for (i,y) in enumerate(eachcol(Y))
+			B[:,i] .=(w[:,i].*X)\(y.*w[:,i])
+		end
+	end
+	return B
+end
+
+# ╔═╡ e53dcd8e-8e9a-4022-8d4e-1677beff560b
+for (i,c) in enumerate(eachcol(rand(3,2)))
+	@show i,c
+end
+
+# ╔═╡ 95b62e83-58ad-4cbc-831f-8051275378eb
+function bivariate_uncorrelated_gaussian(mu1,mu2,s1,s2)
+	return (x,y)-> @. (1.0/(2*π*s1*s2))*exp(-0.5*((x-mu1)/s1)^2 - 0.5*((y-mu2)/s2)^2)
+end
+
+# ╔═╡ 30ab1541-119c-4766-b8f2-10553d0498d4
+begin
+	bv_gauss_fun_check = bivariate_uncorrelated_gaussian(muy,mux,sigmay,sigmax)
+	
+	fun_eval = bv_gauss_fun_check(1:M,(1:N)')
+	
+	weights = fun_eval[Ytrain_indices[1],Ytrain_indices[2]]
+	simshow(fun_eval)
+end
+
+# ╔═╡ db64c184-4163-40cb-ae82-d94668d3ee5d
+extrema(weights)
 
 # ╔═╡ 23fbbc31-4a91-4e0f-9c14-71cb1b74168d
 function centr!(X) 
@@ -232,35 +310,61 @@ end
 begin
 	#B = MultivariateStats.llsq(XTrain,
 	#	YTrain)
-	B = hcat(Itrain,XTrain)\YTrain
-	Ypredict = hcat(Itest,XTest)*B
+	# ridge regression coefficient
+	
+	#simple regression
+	#B = hcat(Itrain,XTrain)\YTrain
+	B = XTrain\YTrain
+	size(B)
+	#Ypredict = hcat(Itest,XTest)*B
+	Ypredict = XTest*B
+
+	#PCA + regression
 	svd_obj = simpleSVD(copy(XTrain))
 	setdim!(svd_obj,dim=diment)
 	X_copy = copy(XTrain)
 	centr!(X_copy)
-	@show norm(X_copy - calculate(svd_obj));
+	norm(X_copy - calculate(svd_obj));
 	Bpca = hcat(Itrain,score(svd_obj))\YTrain
 	Xtest_reduced= predict(svd_obj,XTest)
 	Ypredict_pca = hcat(Itest,Xtest_reduced)*Bpca
-	
+
+	# Ridge regression
 	Brid = MultivariateStats.ridge(XTrain,YTrain,alfa)
 	Ypredict_ridge = hcat(Itest,XTest)*Brid
 
-	BridPCA = MultivariateStats.ridge(score(svd_obj),YTrain,alfa)
+	# Ridge + PCA regression
+	BridPCA = MultivariateStats.ridge(score(svd_obj),YTrain,alfa_const)
 	# Xtest_reduced= predict(svd_obj,XTest)
 	Ypredict_ridge_pca = hcat(Itest,Xtest_reduced)*BridPCA	
+	#local-weighted regression
+	bv_gauss_fun = bivariate_uncorrelated_gaussian(muy,mux,sigmay,sigmax)
+	Blw = weigted_regression(hcat(Itrain,XTrain),YTrain,weights)
+	Ypredict_local_weighted = hcat(Itest,XTest)*Blw
+
+	
+	norm_data = DataFrame("linreg"=>norm(YTest-Ypredict),
+						   "pca"=>norm(YTest-Ypredict_pca),
+							"ridge"=>norm(YTest - Ypredict_ridge),
+							"ridge_pca"=>norm(YTest-Ypredict_ridge_pca),
+							"local-weighted"=> norm(YTest-Ypredict_local_weighted))
 end;
 
-# ╔═╡ 9ef26e86-8bf9-4584-9257-4083efea0ecb
-trim_bounds(lb,rb,val)= val<lb ? lb : val>rb ? rb : val
+# ╔═╡ c2898546-9255-4889-849e-ddf5504fe026
+norm_data
 
 # ╔═╡ 4c39f833-4905-4c08-977e-8e9d5687e546
 function trim_to_grey!(image_data)
-	for (i,a) in enumerate(image_data)
-		image_data[i]=trim_bounds(0,1,a)
-	end
+	#for (i,a) in enumerate(image_data)
+	#	image_data[i]=trim_bounds(0,1,a)
+	#end
+	(min,max) = extrema(image_data)
+	@. image_data = (image_data - min)/(max-min)
 	return image_data
 end
+
+# ╔═╡ 9ef26e86-8bf9-4584-9257-4083efea0ecb
+trim_bounds(lb,rb,val)= val<lb ? lb : val>rb ? rb : val
 
 # ╔═╡ 474149e5-0cf9-41d5-a2a8-66ceabc3441c
 function get_inds(vert,hor,step=2)
@@ -285,6 +389,9 @@ begin
 			 gray_image_to_show[a_dim+1:end,b_dim+1:end] .= Gray.(trim_to_grey!(Ypredict_ridge))
 		 elseif show_part =="ridge pca"
 			  gray_image_to_show[a_dim+1:end,b_dim+1:end] .= Gray.(trim_to_grey!(Ypredict_ridge_pca))
+		 elseif show_part =="local-weighted"
+			  gray_image_to_show[a_dim+1:end,b_dim+1:end] .= Gray.(trim_to_grey!(Ypredict_local_weighted))
+			 gray_image_to_show[Ytrain_indices[1],Ytrain_indices[2]] .=Gray.(trim_to_grey!(YTrain.*weights))
 		 else
 			 Ypredict_pca
 			 gray_image_to_show[a_dim+1:end,b_dim+1:end] .= Gray.(trim_to_grey!(Ypredict_pca))
@@ -311,7 +418,7 @@ end
 # ╠═def5f2de-5a50-41df-a441-0194aa2d5f47
 # ╠═50a7dbad-029b-4119-8fd0-385f33ff40da
 # ╠═b6d92087-39f0-4f53-9719-cbe1e00de563
-# ╟─0aef72ed-0299-4364-9ea9-cf4d97482fd8
+# ╠═0aef72ed-0299-4364-9ea9-cf4d97482fd8
 # ╠═6ee3317f-a080-4a6c-8d27-76ae02cc9dc9
 # ╠═cc60dc9e-2eb1-4037-a517-b31ff8746f6a
 # ╠═30ca39c9-709d-46e1-8edd-2ff3975af278
@@ -323,17 +430,26 @@ end
 # ╠═19e79d80-2282-43bb-9fd4-a8e0dc057c1e
 # ╠═a1d79755-d99f-464e-8c86-3b5d0c42a9c4
 # ╠═9007a73f-92c7-438c-86ff-df13fa88f32a
-# ╟─40a1c667-11a8-48da-94d3-61263e0f52f3
+# ╠═40a1c667-11a8-48da-94d3-61263e0f52f3
 # ╟─06293b21-39a4-49a8-999b-d1a283273f84
 # ╟─b0c6d40a-5723-4f77-af8a-fb50b04ffab9
-# ╠═495cf577-4a43-4a8b-8180-da03563ea104
+# ╟─495cf577-4a43-4a8b-8180-da03563ea104
 # ╟─86adaebf-3313-48da-9634-91f36ab2b577
 # ╟─59a6eee5-4727-42e6-9946-eb8ca6ffcd65
 # ╟─d97cce38-8c67-40db-a5a2-053d1f320f15
 # ╟─3a60f58e-2562-4743-b5a4-7037fd28d691
 # ╟─7970325f-5dc3-474f-867f-81e906471677
-# ╟─8bca55a4-bf1b-47db-8593-338862a9a4f5
-# ╟─8a9cb875-53c8-42cc-a6e6-bea059e19852
+# ╟─b3034d2c-afa7-4d7a-9159-b4477057642e
+# ╟─30ab1541-119c-4766-b8f2-10553d0498d4
+# ╟─c2898546-9255-4889-849e-ddf5504fe026
+# ╟─07c5113a-69b6-4983-9384-768db121e7b9
+# ╠═8bca55a4-bf1b-47db-8593-338862a9a4f5
+# ╠═ad685d82-b2cd-438d-b4e0-6155848ab651
+# ╠═8a9cb875-53c8-42cc-a6e6-bea059e19852
+# ╠═db64c184-4163-40cb-ae82-d94668d3ee5d
+# ╟─ba209452-2ec7-42ba-a607-244d1c7cbea7
+# ╟─e53dcd8e-8e9a-4022-8d4e-1677beff560b
+# ╟─95b62e83-58ad-4cbc-831f-8051275378eb
 # ╟─adb95995-1e36-4c2b-922c-d2f14eb16e7c
 # ╟─9aadcae9-0abb-4c57-a1a4-50406d704554
 # ╟─23fbbc31-4a91-4e0f-9c14-71cb1b74168d
@@ -342,7 +458,7 @@ end
 # ╟─afd79dd6-3182-454f-870b-cc98be000fb4
 # ╟─54ea96e1-58e3-4e4c-979f-74a0969875d2
 # ╟─4c39f833-4905-4c08-977e-8e9d5687e546
-# ╟─9ef26e86-8bf9-4584-9257-4083efea0ecb
+# ╠═9ef26e86-8bf9-4584-9257-4083efea0ecb
 # ╟─474149e5-0cf9-41d5-a2a8-66ceabc3441c
 # ╟─ada0dc4c-3414-4388-b62d-b5667aa0249e
 # ╟─6f29896b-b01d-4df6-b506-ed0bfa22aa3c
