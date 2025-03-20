@@ -167,8 +167,8 @@ md"""
 	``\mu_2=`` $( @bind mux Slider(1:size(im_data,2),show_value=true,default=180) ) \
 
 
-	``\sigma_1=`` $( @bind sigmay Slider(1e-2:1e-2:1000,show_value=true,default=60) )
-	``\sigma_2=`` $( @bind sigmax Slider(1e-2:1e-2:1000,show_value=true,default=60) )	
+	``\sigma_1=`` $( @bind sigmay Slider(5:1:1000,show_value=true,default=60) )
+	``\sigma_2=`` $( @bind sigmax Slider(5:1:1000,show_value=true,default=60) )	
 	"""
 
 # ╔═╡ 07c5113a-69b6-4983-9384-768db121e7b9
@@ -439,7 +439,7 @@ end
 # ╟─d97cce38-8c67-40db-a5a2-053d1f320f15
 # ╟─3a60f58e-2562-4743-b5a4-7037fd28d691
 # ╟─7970325f-5dc3-474f-867f-81e906471677
-# ╟─b3034d2c-afa7-4d7a-9159-b4477057642e
+# ╠═b3034d2c-afa7-4d7a-9159-b4477057642e
 # ╟─30ab1541-119c-4766-b8f2-10553d0498d4
 # ╟─c2898546-9255-4889-849e-ddf5504fe026
 # ╟─07c5113a-69b6-4983-9384-768db121e7b9
