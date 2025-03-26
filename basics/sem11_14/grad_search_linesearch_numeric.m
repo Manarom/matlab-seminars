@@ -33,6 +33,7 @@ function [x,Fval,ii,flag]=grad_search_linesearch_numeric(x0,F,gradF,options)
         F_mu = @(mu_trial) F(x - mu_trial*grad_direction);% формулируем как указатель на функцию от длины шага
         gradF_mu = @(mu_trial) num_grad(F_mu,mu_trial);
         [mu,~,iter_number]=grad_search_linesearch(mu,F_mu,gradF_mu,"N",20);
+        %[mu,iter_number] = fminbnd(gradF_mu,1e-3,100*mu,optimset("MaxIter",20));
         Fval = F_mu(mu);
         x = x - mu*grad_direction;
         ii=ii+iter_number;
