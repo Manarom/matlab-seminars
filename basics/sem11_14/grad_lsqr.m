@@ -37,7 +37,7 @@ function [x,Fval,ii,flag,search_history]=grad_lsqr(x0,r,Jac,options)
 
     residual=r(x0); % вектор ошибки
     J = Jac(x0); % матрица Якоби
-    Fval = F(residual); % значение функции невязки
+    Fval = discr(residual); % значение функции невязки
 
     is_return_search_history = false; % флажок, который показывает нужно ли нам возвращать историю поиска
     if nargout==5 % так как хранение всех точек может быть тяжелым делаем 
@@ -61,7 +61,7 @@ function [x,Fval,ii,flag,search_history]=grad_lsqr(x0,r,Jac,options)
         
         residual = r(x); % обновляем вектор ошибки
         J = Jac(x); % обновляем матрицу Якоби
-        Fval=F(residual); % рассчитываем значение функции для этой координаты
+        Fval=discr(residual); % рассчитываем значение функции для этой координаты
         
         if is_return_search_history
             search_history(:,ii+1) = x;% если нужны промежуточные точки - добавляем
@@ -76,6 +76,6 @@ function [x,Fval,ii,flag,search_history]=grad_lsqr(x0,r,Jac,options)
         search_history = search_history(:,1:ii);
     end
 end
-function discrepancy = F(r)
+function discrepancy = discr(r)
     discrepancy = r'*r/2;
 end
