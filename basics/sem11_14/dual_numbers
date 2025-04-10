@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.5
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    return quote
+    quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -37,9 +37,24 @@ md"""
 # Автоматическое дифференцирование
 """
 
+# ╔═╡ 8493bea7-9e9f-459e-bcfd-b63c14efe5d8
+md"""
+## Мнимые числа 
+
+мнимое число задается выражением $a+bi$
+
+допустим мы хотим посчитать функцию $f(x)=x^3$ для комплексного числа
+
+$f(a+i)=(a+i)^3=a^3+3ai^2+3a^2i+i^3$ 
+
+мы можем записать 
+
+$f(x+ih) = f(x)+f\prime (x)ih-\frac{1}{2}f ″(x)h^2 + \mathcal{O}(h^2)$
+"""
+
 # ╔═╡ 3a850994-b007-4ef8-bdce-ed424182328a
 md"""
-## МОТИВАЦИЯ! Проблемы чисел с плавающей запятой
+## Мотивация! Проблемы чисел с плавающей запятой
 """
 
 # ╔═╡ 7eeae323-7e45-4e9c-811a-0694641d8ecf
@@ -48,6 +63,9 @@ begin
 	println("Float64 eps is ",eps(Float64))
 	
 end
+
+# ╔═╡ 99357493-2a0d-4aae-abad-999445cb0fdd
+eps(10000000000000.)
 
 # ╔═╡ 7e1546f0-f4ae-4360-9561-2ca6de5aa906
 @bind sl Slider(0.0000001:0.001:1000, show_value=true) 
@@ -342,17 +360,29 @@ end
 # ╔═╡ fae6e686-adde-4d43-8e4b-44cfadb2179b
 2+(eps()-eps())
 
+# ╔═╡ 0b3b302e-8eda-4d49-822d-8e5515ecc8bb
+begin
+	e=1e-10;
+	println(e);
+	println(1+e);
+	e2 = (1+e)-1;
+	println(e2);
+	println(e-e2)
+end
+
 # ╔═╡ 0153e9c1-c1b0-4e70-ba23-6f2c5f33826f
 begin
 	f₁(x) = x^3; # Функция
 	f′(x) = 3x^2; # Производная (истинная)
 	f′ₙ(f,x,h) = @.(f(x+h)-f(x))/h; # Численно вычисленная производная
 	f′ₙ₁(f,x,h) = @.(f(x+h)-f(x-h))/2h; # Численно вычисленная производная центральной разностью
+	∇fnum(f,x,h)=map(t->imag(f(t+im*h)/h),x)
 end
 
 # ╔═╡ 96c182a5-5de4-4707-87ab-5e66b3232acd
 begin
-	fd = Dual(3, 1)
+	fd = Dual(3, 1) 
+	println(fd*fd) # x^2
 	(fd*fd).der ## x^2 -> 2x | при x=3 получим 2*3 =6
 end
 
@@ -379,6 +409,7 @@ begin
 	plot(x,f′.(x), label = L"f'(x) = 3x^2", legend=:bottomleft)
 	plot!(x,f′ₙ(f₁,x,h(p)), label = L"f'(x_0) = \frac{f(x_0+h)-f(x_0)}{h}")
 	plot!(x,f′ₙ₁(f₁,x,h(p)), label = L"f'(x_0) = \frac{f(x_0+h)-f(x_0-h)}{2h}")
+	plot!(x,∇fnum(f₁,x,h(p)), label = L"f'(x_0) =\frac {Im[f(x_0+i \cdot h)]}{h}")
 	ylims!(-5,10)
 	xlims!(-2.5,2.5)
 end
@@ -398,14 +429,14 @@ begin
 end
 
 # ╔═╡ 827ee95d-c405-4dc0-8345-c0d17aab4ac0
-fquad(x, y) = x^2 + x*y
+fquad(x, y) = x^2 + x*y 
 
 # ╔═╡ a9448aec-3da5-493d-a8fa-b7f4de85055b
 begin
 	## Сделаем хитрость №2
 	a, b = 3.0, 4.0;
 	fquad_1(x) = fquad(x, b);
-	derivative(fquad_1, a) ## ∂f/∂x  = 2x+y = 2×3+4 = 10
+	derivative(fquad_1, a) ## ∂f/∂x  = 2x+y = 2×3+4 = 10 #(a+e)^2+(a+e)*b
 end
 
 # ╔═╡ 771b61e1-9df0-433f-9aba-f453e3613555
@@ -436,7 +467,7 @@ gcubic(x, y) = x*x*y + x + y
 # ╔═╡ a49d0438-9829-4274-8b1b-ecfcb1e241b4
 begin
 	(aa, bb) = (1.0, 2.0)
-	xx = MultiDual(aa, SVector(1.0, 0.0))
+	xx = MultiDual(aa, SVector(1.0, 0.0)) 
 	yy = MultiDual(bb, SVector(0.0, 1.0))
 	gcubic(xx, yy)
 end
@@ -542,6 +573,27 @@ $f(D) = f(D_0) + f'(D_0)\Sigma \epsilon$
 
 где $f'(D_0)$ - полный якобиан
 """
+
+# ╔═╡ 3916c4f0-2a6c-45e1-9861-768056a0269b
+md"""
+## Вторые производные
+
+Подход с дуальными числами может быть расширен на производные более высоких порядков (например вторые производные)
+
+$f(a+ε)=f(a)+\varepsilon f′(a)+\frac{1}{2}\varepsilon^2 f″(a)+...$
+
+Для примера для функции 
+$\mathbf{f}:\mathbb{R}^n \rightarrow \mathbb{R}$ получим
+
+$f(x+εv)=f(x)+ε[Σ_i (\partial_i f)(x)v_i]+\frac{1}{2}ε^2[\Sigma_i \Sigma_j(\partial_{i,j}v_i v_j)]$
+
+Таким образом можно вычислить коэффициенты матрицы Гесса
+"""
+
+
+
+# ╔═╡ 6de2a358-c15a-49d5-9860-7a034edf855c
+#ForwardDiff.
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1796,13 +1848,16 @@ version = "1.4.1+2"
 # ╔═╡ Cell order:
 # ╠═778d6290-0f20-11f0-1216-dfcc2ef9b7ef
 # ╟─accddf54-2f9d-4cb3-a1e8-4830208d079d
+# ╟─8493bea7-9e9f-459e-bcfd-b63c14efe5d8
 # ╟─3a850994-b007-4ef8-bdce-ed424182328a
 # ╠═7eeae323-7e45-4e9c-811a-0694641d8ecf
+# ╠═99357493-2a0d-4aae-abad-999445cb0fdd
 # ╠═7e1546f0-f4ae-4360-9561-2ca6de5aa906
 # ╠═4569d4a5-db4a-4045-9713-607027a4015f
 # ╟─d8729ed7-6149-4026-b848-c29b7e5c4e71
 # ╠═fe5980a1-a1d4-4865-969e-adafea7911c0
 # ╠═fae6e686-adde-4d43-8e4b-44cfadb2179b
+# ╠═0b3b302e-8eda-4d49-822d-8e5515ecc8bb
 # ╟─c78656ff-3b8d-4ab0-939c-8c35184f8383
 # ╟─d81ba2a0-d6cc-4d66-a344-493a746b4004
 # ╟─cdb458e7-d1c1-47be-b7f9-82cabf837367
@@ -1812,8 +1867,8 @@ version = "1.4.1+2"
 # ╟─c381887a-88f3-4979-ace5-ff40db2d018a
 # ╟─0214a1eb-69ae-4f7a-a821-d4e444a6059d
 # ╟─1a4dbbc6-4be6-4fa4-abcb-f803d6c285cf
-# ╟─bd793d09-8288-4baf-8ece-c4353bef387a
-# ╟─71068f7c-f89f-4db9-81ca-0566059b493e
+# ╠═bd793d09-8288-4baf-8ece-c4353bef387a
+# ╠═71068f7c-f89f-4db9-81ca-0566059b493e
 # ╟─8d47aa37-3d40-497f-a953-164290b24c46
 # ╟─1c8240c5-e9d6-4a54-aa6e-48ded54bad8a
 # ╟─c23de12f-bd71-4021-9dad-d7d0d478ab3d
@@ -1828,38 +1883,40 @@ version = "1.4.1+2"
 # ╠═541a4751-cd45-4b7c-8ee9-a42beaad00dd
 # ╟─e29595bd-4d2a-4fec-a61f-c733169f50af
 # ╠═561bcc31-80cc-4145-8137-f7ca7f19c626
-# ╠═36ff75ed-af59-4c7e-818d-b3b5981fe2c1
-# ╠═d8d70128-f61d-48aa-9954-55071f71c4e5
+# ╟─36ff75ed-af59-4c7e-818d-b3b5981fe2c1
+# ╟─d8d70128-f61d-48aa-9954-55071f71c4e5
 # ╠═827ee95d-c405-4dc0-8345-c0d17aab4ac0
-# ╠═1676ed74-45a4-4ff9-88b6-b86459d4d29a
+# ╟─1676ed74-45a4-4ff9-88b6-b86459d4d29a
 # ╠═87a30e49-3ea8-442e-8333-9130d257922c
 # ╠═a9448aec-3da5-493d-a8fa-b7f4de85055b
 # ╠═771b61e1-9df0-433f-9aba-f453e3613555
 # ╠═33c1762c-a615-4883-95ce-57b98beb5c8e
-# ╠═4bbca898-de86-442e-a07e-4044cb893c9a
-# ╠═bae6f366-701f-4fbb-b4b0-1519f1f59d78
+# ╟─4bbca898-de86-442e-a07e-4044cb893c9a
+# ╟─bae6f366-701f-4fbb-b4b0-1519f1f59d78
 # ╟─b947314d-c3a3-4014-b8d3-ddd7c375a729
 # ╟─4cf68816-bdcb-46a4-b18e-c8db8df9b619
-# ╠═bb7ca78a-8842-495e-8f67-cc4da75f1a0a
+# ╟─bb7ca78a-8842-495e-8f67-cc4da75f1a0a
 # ╟─ad525726-9610-42cd-aef5-6521964699d1
 # ╠═07eff3da-3c98-4f11-8a87-99f4b0170b29
 # ╠═06f51a1c-8a20-4e7a-a403-cb8e6a0eadad
 # ╠═9cd7f6ff-72c8-432c-bcd9-2b9696fa7333
-# ╠═46466f64-32e5-411d-bed3-f615dfb53a54
+# ╟─46466f64-32e5-411d-bed3-f615dfb53a54
 # ╠═8adf876e-e6e6-46a7-b34d-d57136f88a6b
 # ╠═a49d0438-9829-4274-8b1b-ecfcb1e241b4
-# ╠═7127fb59-0724-4106-944f-40b0fc73ff51
-# ╠═c765a24a-7d00-4667-9d92-2576cbf1e88d
+# ╟─7127fb59-0724-4106-944f-40b0fc73ff51
+# ╟─c765a24a-7d00-4667-9d92-2576cbf1e88d
 # ╠═07763895-01ab-4efa-b8af-be11dd0a6785
 # ╟─306dfeea-39b2-4eb4-9c9d-709ebeb37ce6
 # ╠═a5777f86-6225-457e-813b-cf26aa426f33
 # ╠═0a5aafd5-3843-4373-aae5-88c75ee47731
-# ╠═69ed8b66-ea2b-4870-ad01-c5c7a9b56304
-# ╠═b7344946-0073-4584-87eb-5ee2e67ad080
-# ╠═9624e65b-80bf-4b88-b96e-bb053fbed459
-# ╠═e7171a89-2889-4da5-ad8b-1f9adb645281
-# ╠═f42d9096-6e92-4d1b-b9df-b9e2caa56623
-# ╠═1b665d04-380e-41cf-b507-278520b312e3
-# ╠═08abb4b7-495b-4aef-968b-aa1e3d6da44a
+# ╟─69ed8b66-ea2b-4870-ad01-c5c7a9b56304
+# ╟─b7344946-0073-4584-87eb-5ee2e67ad080
+# ╟─9624e65b-80bf-4b88-b96e-bb053fbed459
+# ╟─e7171a89-2889-4da5-ad8b-1f9adb645281
+# ╟─f42d9096-6e92-4d1b-b9df-b9e2caa56623
+# ╟─1b665d04-380e-41cf-b507-278520b312e3
+# ╟─08abb4b7-495b-4aef-968b-aa1e3d6da44a
+# ╟─3916c4f0-2a6c-45e1-9861-768056a0269b
+# ╠═6de2a358-c15a-49d5-9860-7a034edf855c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
