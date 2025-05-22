@@ -39,8 +39,9 @@
 
 Семинар 12. Сингулярное и спектральное разложения матриц [pdf](./applications/PrincipalComponentAnalysis/sem11_14/pdfs/sem12.pdf),[mlx](./applications/PrincipalComponentAnalysis/sem11_14/sem12.mlx)
 
+Семинар 13. Сингулярное разложение матрицы эксперимента и спектральное разложении матрицы ковариции [pdf](./applications/PrincipalComponentAnalysis/sem11_14/pdfs/sem13.pdf),[mlx](./applications/PrincipalComponentAnalysis/sem11_14/sem13.mlx)
 
-Семинар 13. Сингулярное разложение матрицы эксперимента и спектральное разложении матрицы ковариции [pdf](./applications/PrincipalComponentAnalysis/sem11_14/pdfs/sem14.pdf),[mlx](./applications/PrincipalComponentAnalysis/sem11_14/sem14.mlx)
+Семинар 14. Теорема Экхарта-Янга и сжатие изображений [pdf](./applications/PrincipalComponentAnalysis/sem11_14/pdfs/sem14.pdf),[mlx](./applications/PrincipalComponentAnalysis/sem11_14/sem14.mlx)
 
 -------------------------------------
 
