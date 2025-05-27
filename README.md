@@ -53,4 +53,5 @@
 
 Семинар 17. Метод Ньютона и Гаусса-Ньютона. [pdf](./applications/UnconstrainedOptimization/sem15_17/pdfs/sem17.pdf),[mlx](./applications/PrincipalComponentAnalysis/sem15_17/sem17.mlx) 
 
+Семинар 18. Введение в интерполяцию. [pdf](./applications/UnconstrainedOptimization/sem18/pdfs/sem18.pdf),[mlx](./applications/PrincipalComponentAnalysis/sem18/sem18.mlx) 
 
