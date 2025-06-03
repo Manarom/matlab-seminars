@@ -4,6 +4,7 @@
 
 import numpy as np
 import matplotlib
+import os
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
@@ -16,9 +17,9 @@ from scipy.stats import linregress
 #response = requests.get(url)
 # rawdata = response.text
 #rawdata = BytesIO(response.content)
-data = loadmat(".\\basics\\sem7_10\\DataSurfFit") # грузит матлабовский файл
-
-
+proj_dir = os.path.abspath(os.path.dirname(__file__))
+datafilename =os.path.join(proj_dir,"DataSurfFit.mat")
+data = loadmat(datafilename) # грузит матлабовский файл
 X = data["X"] # initial two-column data
 y = data["y"].flatten() # dependent variable column
 
