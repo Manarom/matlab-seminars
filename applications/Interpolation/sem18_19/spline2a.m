@@ -1,4 +1,4 @@
-function coeffs = spline2a(x,y)
+function [coeffs, xplot, yplot] = spline2a(x,y)
 % Demonstration of quadratic spline interpolation using Scheme 1
 % Example 8.2-8.3
 
@@ -49,13 +49,13 @@ for i=1:length(xplot)
     
 end
     
-figure(1)
-hold on
-plot(xplot,yplot,'LineWidth',2)
-plot(x,y,'ok','MarkerSize',7,'MarkerFaceColor','k')
-xlabel('x')
-ylabel('y')
-title('Quadratic Spline Interpolation: Scheme 1')
-
-fprintf('\n    Coeffs\n');
-fprintf('%10.3f\n',coeffs);
+% figure(1)
+% hold on
+% plot(xplot,yplot,'LineWidth',2)
+% plot(x,y,'ok','MarkerSize',7,'MarkerFaceColor','k')
+% xlabel('x')
+% ylabel('y')
+% title('Quadratic Spline Interpolation: Scheme 1')
+% 
+% fprintf('\n    Coeffs\n');
+% fprintf('%10.3f\n',coeffs);
