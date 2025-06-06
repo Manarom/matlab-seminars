@@ -47,11 +47,16 @@
 
 ### Нелинейная оптимизация без ограничений
 
-Семинар 15. Метод градиентного поиска [pdf](./applications/UnconstrainedOptimization/sem15_17/pdfs/sem15.pdf),[mlx](./applications/PrincipalComponentAnalysis/sem15_17/sem15.mlx)
+Семинар 15. Метод градиентного поиска [pdf](./applications/UnconstrainedOptimization/sem15_17/pdfs/sem15.pdf),[mlx](./applications/UnconstrainedOptimization/sem15_17/sem15.mlx)
 
-Семинар 16. Решение задачи метода наименьших квадратов итерационными методами [pdf](./applications/UnconstrainedOptimization/sem15_17/pdfs/sem16.pdf),[mlx](./applications/PrincipalComponentAnalysis/sem15_17/sem16.mlx) 
+Семинар 16. Решение задачи метода наименьших квадратов итерационными методами [pdf](./applications/UnconstrainedOptimization/sem15_17/pdfs/sem16.pdf),[mlx](./applications/UnconstrainedOptimization/sem15_17/sem16.mlx) 
 
-Семинар 17. Метод Ньютона и Гаусса-Ньютона. [pdf](./applications/UnconstrainedOptimization/sem15_17/pdfs/sem17.pdf),[mlx](./applications/PrincipalComponentAnalysis/sem15_17/sem17.mlx) 
+Семинар 17. Метод Ньютона и Гаусса-Ньютона. [pdf](./applications/UnconstrainedOptimization/sem15_17/pdfs/sem17.pdf),[mlx](./applications/UnconstrainedOptimization/sem15_17/sem17.mlx) 
 
-Семинар 18. Введение в интерполяцию. [pdf](./applications/UnconstrainedOptimization/sem18/pdfs/sem18.pdf),[mlx](./applications/PrincipalComponentAnalysis/sem18/sem18.mlx) 
+-------------------------------------
 
+### Введение в интерполяцию
+
+Семинар 18. Введение в интерполяцию. [pdf](./applications/Interpolation/sem18_19/pdfs/sem18.pdf),[mlx](./applications/Interpolation/sem18_19/sem18.mlx) 
+
+Семинар 19. Введение в интерполяцию. Сплайны. [pdf](./applications/Interpolation/sem18_19/pdfs/sem19.pdf),[mlx](./applications/Interpolation/sem18_19/sem19.mlx) 
