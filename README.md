@@ -60,3 +60,7 @@
 Семинар 18. Введение в интерполяцию. [pdf](./applications/Interpolation/sem18_19/pdfs/sem18.pdf),[mlx](./applications/Interpolation/sem18_19/sem18.mlx) 
 
 Семинар 19. Введение в интерполяцию. Сплайны. [pdf](./applications/Interpolation/sem18_19/pdfs/sem19.pdf),[mlx](./applications/Interpolation/sem18_19/sem19.mlx) 
+
+### Основы матлаб
+
+Семинар 20. Объектно-ориентированное программирование. [pdf](./basics/sem20_23/pdfs/sem20.pdf),[mlx](./basics/sem20_23/sem20.mlx)

@@ -11,13 +11,17 @@ classdef OneDhandle<handle
             end
             obj.x = input_arg;
         end
-        function out = plus(o1,o2)
-            out = OneD(o1.x + o2.x);
+        function o1 = plus(o1,o2)
+            o1.x = o1.x + o2.x;
+        end
+        function o1 = triplus(o1,o2,o3)
+            disp("OneDhandle method called")
+            o1.x = o1.x + o2.x + o3.x;
         end
         function out = sum(o)
-            out = OneD();
+            out = OneDhandle();
             for i = 1:numel(o)
-                out = out + o(i);
+                plus(out,o(i));
             end
         end
     end
