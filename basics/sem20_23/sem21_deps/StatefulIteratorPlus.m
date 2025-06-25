@@ -4,13 +4,13 @@ classdef StatefulIteratorPlus<StatefulIterator
     properties
         action_function function_handle
     end
-    
     methods
-        function obj = StatefulIteratorPlus(action_function)
+        function obj = StatefulIteratorPlus(collection,action_function)
             arguments
+                collection
                 action_function function_handle = @plus
             end
-            obj@StatefulIterator(); % вызываем конструктор суперкласса
+            obj@StatefulIterator(collection); % вызываем конструктор суперкласса
             obj.action_function = action_function;
         end
         function refresh_value(obj,a_next)
