@@ -34,8 +34,9 @@ classdef Iterator<handle
         end
         function val = collect(obj)
             N = obj.max_state;
-            i0 = obj.state;
-            val = NaN(N,1);
+            i0 = obj.state;% начальное состояние
+            val = NaN(N,1);% резервируем память под выходной массив
+            % constructor = str2func(class(obj.collection))
             while true
                 [i,v] = obj.iterate();
                 val(i0) = v;
