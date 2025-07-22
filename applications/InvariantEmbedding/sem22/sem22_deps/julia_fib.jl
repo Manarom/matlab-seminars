@@ -1,10 +1,11 @@
 using BenchmarkTools
 
-fib(N) = N<=2 ? 1 : fib(N-2) + fib(N-1)
-
+function fib(N) 
+    return N<=2 ? 1 : fib(N-2) + fib(N-1)
+end
 @benchmark fib(45)
 # fib(45) = 3.54 s
-D = Ref(Dict{Int,Int}())
+const D = Ref(Dict{Int,Int}())
 function fib_mem(N)
     !haskey(D[],N) || return D[][N] 
     push!(D[],N=> N<=2 ? 1 : fib_mem(N-2) + fib_mem(N-1))
@@ -23,7 +24,7 @@ function memoize(f)
     end
 end
 
-f = N-> N<=2 ? 1 : f(N-2) + f(N-1)
+f = N-> N<=2 ? 1 : f(N-1) + f(N-2) 
 
 f = memoize(f)
 

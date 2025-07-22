@@ -63,4 +63,10 @@
 
 ### Основы матлаб
 
-Семинар 20. Объектно-ориентированное программирование. [pdf](./basics/sem20_23/pdfs/sem20.pdf),[mlx](./basics/sem20_23/sem20.mlx)
+Семинар 20. Объектно-ориентированное программирование. [pdf](./basics/sem20_21/pdfs/sem20.pdf),[mlx](./basics/sem20_21/sem20.mlx)
+
+Семинар 21. ООП. Пример. Итераторы. [pdf](./basics/sem20_21/pdfs/sem21.pdf),[mlx](./basics/sem20_21/sem21.mlx)
+
+## Метод инвариантного погружения
+
+Семинар 22. Метод инвариантного погружения. [pdf](./applications\InvariantEmbedding\sem22\sem22.pdf),[mlx](./applications\InvariantEmbedding\sem22\sem22.mlx)
