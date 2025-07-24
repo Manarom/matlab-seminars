@@ -36,4 +36,4 @@ resources/
 .vscode
 
 # venv folder
-venv
+.venv
