@@ -69,4 +69,4 @@
 
 ## Метод инвариантного погружения
 
-Семинар 22. Метод инвариантного погружения. [pdf](./applications\InvariantEmbedding\sem22\sem22.pdf),[mlx](./applications\InvariantEmbedding\sem22\sem22.mlx)
+Семинар 22. Метод инвариантного погружения. [pdf](./applications\InvariantEmbedding\sem22\pdfs\sem22.pdf),[mlx](./applications\InvariantEmbedding\sem22\sem22.mlx)
